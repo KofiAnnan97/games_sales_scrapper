@@ -1,0 +1,2 @@
+# Steam Sales Scrapper
+The purpose of this script is to scrape the Steam API to determine whether a game has reached a specified price threshold. If one or more games fall below the user-defined limit, the script will output a string containing the names of the games along with their respective prices.

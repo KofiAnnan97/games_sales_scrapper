@@ -1,0 +1,9 @@
+# Secrets
+.env
+
+# Rust Build
+Cargo.lock
+target/
+
+# Data
+*.json
