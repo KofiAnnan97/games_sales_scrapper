@@ -270,6 +270,46 @@ fn remove_game(name: &str){
     
 }
 
+fn update_game(name: &str, price: f64) {
+    let game_name = name.to_owned();
+    let mut thresholds : Vec<Threshold> = Vec::new();
+    match load_thresholds(){
+        Ok(data) => thresholds = data,
+        Err(e) => println!("Error: {}", e)
+    }
+    let idx = thresholds.iter().position(|app| *app.name == game_name);
+    if !idx.is_none(){
+        let i = idx.unwrap();
+        if price != thresholds[i].desired_price {
+            let old_threshold = thresholds[i].desired_price.clone();
+            thresholds[i].desired_price = price;
+            println!("\"{}\" updated price threshold from {} to {}", thresholds[i].name,
+                                                       old_threshold,
+                                                       thresholds[i].desired_price);
+            let data_str = serde_json::to_string(&thresholds).unwrap();
+            write_to_file(get_load_path(), data_str)
+        }
+        else {
+            println!("\"{}\" did not update. Value given: {}", thresholds[i].name, price);
+        }
+        
+    }
+}
+
+fn list_game_thresholds() {
+    match load_thresholds(){
+        Ok(data) => {
+            println!("Price Thresholds");
+            for threshold in data.iter() {
+                println!("\t- {} => {} ({})", threshold.name, 
+                                              threshold.desired_price, 
+                                              threshold.currency);
+            }
+        }
+        Err(e) => println!("Error: {}", e)
+    }
+}
+
 // Search Functions
 async fn search_by_keyphrase(keyphrase: &str) -> Result<Vec<String>>{
     let mut games_list : Vec<App> = Vec::new();
@@ -370,17 +410,20 @@ async fn main(){
     
     let command = "SEARCH";
     let title = "The Last of Us™";
+    let price = 30.00;
     match command {
-        "ADD" => add_game(title, 25.00).await,
-        "REMOVE" => remove_game(title),
-        "CHECK" => {
-            let email_str = check_prices().await;
-            println!("{}", email_str);
-        },
         "SEARCH" => search_game(title).await,
+        "ADD" => add_game(title, price).await,
+        "UPDATE" => update_game(title, price),
+        "REMOVE" => remove_game(title),
+        "LIST" => list_game_thresholds(),
         "CACHE" => {
             println!("Caching started");
             update_cached_games().await;
+        },
+        "CHECK" => {
+            let email_str = check_prices().await;
+            println!("{}", email_str);
         },
         &_ => println!("Unknown command: {}", command)
     }
@@ -389,7 +432,7 @@ async fn main(){
     /*add_game("The Last of Us™ Part I, 25.00).await;
     add_game("Kunitsu-Gami: Path of the Goddess", 20.00).await;
     add_game("South of Midnight", 20.00).await;
-    add_game("Returnal™", 40.00).await;
+    add_game("Returnal™", 20.00).await;
     add_game("Persona 3 Reload", 30.00).await;
     add_game("The First Berserker: Khazan", 30.00).await;
     add_game("Indiana Jones and the Great Circle", 30.00).await;
