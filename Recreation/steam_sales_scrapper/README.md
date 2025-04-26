@@ -1,5 +1,5 @@
 # Steam Sales Scrapper
-The purpose of this script is to scrape the Steam API to determine whether a game has reached a specified price threshold. If one or more games fall below the user-defined limit, the script will output a string containing the names of the games along with their respective prices.
+The purpose of this script is to scrape the Steam Web API to determine whether a game has reached a specified price threshold. If one or more games fall below the user-defined limit an email will be sent containing a list of games along with their respective prices.
 
 ## Quick Start
 1. Setup SMTP server/service (TLS required/optional)
@@ -15,32 +15,32 @@ The purpose of this script is to scrape the Steam API to determine whether a gam
     SMTP_USERNAME={smtp_username}
     SMTP_PWD={stmp_password}
     ```
-4. Run one the commands below (supports cargo commands).
-5. [Optional] Tweak and run set_cron.sh (for Unix-based) to automate when and how often the script is run.
+4. Run one the commands below (supports commands from cargo).
+5. [Optional] Tweak and run set_cron.sh (for Unix-based systems) to automate when and how often the script is run.
 
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.
-- `SEARCH` := find a game title based on keyphrase and add game with price threshold
+- `SEARCH` := find a game title based on keyphrase and add game with price threshold.
     ```bash 
     steam_sales_scrapper search --keyphrase <keyphrase>
     ```
-- `ADD` := add a specified game (title must be exact to work)
+- `ADD` := add a specified game (title must be exact to work).
     ```bash 
     steam_sales_scrapper add --title <title> --price <price>
     ```
-- `UPDATE` := update price threshold for a specified game
+- `UPDATE` := update price threshold for a specified game.
     ```bash 
     steam_sales_scrapper update --title <title> --price <price>
     ```
-- `REMOVE` := remove a specified game
+- `REMOVE` := remove a specified game.
     ```bash 
     steam_sales_scrapper remove --title <title>
     ```
-- `LIST` := list all the stored price thresholds for selected games 
+- `LIST` := list all the stored price thresholds for selected games.
     ```bash 
     steam_sales_scrapper --list-all
     ```
-- `CACHE` := update the local stored cache of steam games 
+- `CACHE` := update the locally stored cache of steam games (title and app ids).
     ```bash 
     steam_sales_scrapper --update-cache
     ```

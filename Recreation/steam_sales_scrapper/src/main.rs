@@ -352,7 +352,7 @@ async fn search_game(keyphrase: &str) {
                 .read_line(&mut input)
                 .expect("Failed to read user input");
             if input.trim() == "q" {
-                println!("Search terminated.");
+                println!("Add terminated.");
             }
             else {
                 match input.trim().parse::<i32>() {
