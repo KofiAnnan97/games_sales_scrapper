@@ -366,7 +366,7 @@ async fn search_game(keyphrase: &str) -> Option<String>{
                             return Ok::<std::string::String, Error>(title).ok();
                         }
                         else if idx >= search_list.len(){
-                            eprintln!("Integer \"{}\" is invalid. Terminating request.", idx);
+                            eprintln!("Integer \"{}\" is invalid. Request terminated.", idx);
                         }
                     },
                     Err(e) => println!("Invalid input: {}\nError: {}", input, e)
@@ -387,13 +387,12 @@ async fn check_prices() -> String {
     }
     let mut output = String::from("");
     for elem in thresholds.iter(){
-        let fn_price = get_price(elem.app_id);
-        match fn_price.await {
+        match get_price(elem.app_id).await {
             Ok(po) => {
                 let price_str = format!("\n\t- {} : ${} -> ${} {} ({}% off)", 
                                         elem.name, po.initial, po.final_price, 
                                         po.currency, po.discount_percent);
-                if elem.desired_price > po.final_price {
+                if elem.desired_price >= po.final_price {
                     output.push_str(&price_str);
                 }
             },
@@ -503,24 +502,19 @@ async fn main(){
                 if add_args.contains_id("price"){
                     let title = add_args.get_one::<String>("title").unwrap().clone();
                     let price = add_args.get_one::<f64>("price").unwrap().clone();
-                    let mut app = App {name: String::from(""), app_id: 0};
                     match check_game(&title).await {
-                        Some(data) => app = data,
-                        None => ()
-                    }
-                    if &app.name != "" { 
-                        add_game(app, price).await; 
-                    }
-                    else {
-                        match search_game(&title).await {
-                            Some(t) => {
-                                match check_game(&t).await {
-                                    Some(data) => add_game(data, price).await,
-                                    None => println!("Something went wrong")
+                        Some(app) => add_game(app, price).await,
+                        None => {
+                            match search_game(&title).await {
+                                Some(t) => {
+                                    match check_game(&t).await {
+                                        Some(data) => add_game(data, price).await,
+                                        None => eprintln!("Something went wrong")
+                                    }
                                 }
+                                None => ()
                             }
-                            None => ()
-                        }      
+                        }
                     }
                 }                
             }
