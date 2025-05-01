@@ -19,16 +19,7 @@ Officially tested on Ubuntu 24.04 and Windows 11.
 4. Add games and their respective price threshold using the [support commands](#supported-commands) below (supports commands from cargo).
 5. [Optional] Automate emails
     - **For Unix-based systems:** Update and run set_cron.sh with root priviledges.
-    - **For Windows systems:** (using Task Scheduler)
-        1. Navigate to `Task Scheduler` and select **Create Basic Task**. Provide a name and optional description.
-        2. In the `Trigger` section, set the desired frequency of execution.
-        3. In the `Action` section, select the **Start a program** option
-            - Set the **Program/script** field to your Powershell executable path (typically located at "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe").
-            - Set **Add arguments(optional)** text field to 
-                ```
-                -ExecutionPolicy Bypass -File "C:\path\to\steam_sales_scrapper\send_email.ps1"
-                ```
-        4. Review and click `Finish`.
+    - **For Windows systems:** Update trigger variable to set the frequency of execution then run `set_task_scheduler.ps1`
 
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.

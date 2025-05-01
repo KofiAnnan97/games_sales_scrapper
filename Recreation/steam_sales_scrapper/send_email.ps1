@@ -8,5 +8,5 @@ if(-not(Test-Path -path $LogFolder) -and (Test-Path $LogFolder -IsValid)){
 }
 
 # Run script to get game sales
-$DateTime = (Get-Date -Format "yyyy_dd_MM_HH_mm")
+$DateTime = (Get-Date -Format "yyyy_MM_dd_HH_mm")
 cargo run -- --send-email| Out-String | Set-Content $LogFolder\$DateTime"_email.log"
