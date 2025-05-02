@@ -1,7 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
 # This bash script uses /etc/cron.d to store the CRON job
-
 CRON_DIR="/etc/cron.d"
 CRON_FILE="steam-sales-scrapper"
 
@@ -15,5 +14,6 @@ SCHEDULE="0 13 * * 2,4"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # Configure as a system wide cron job
-sudo echo "$SCHEDULE root $SCRIPT_DIR/send_email.sh" > "$CRON_DIR/$CRON_FILE"
+chmod +x "$SCRIPT_DIR/send_email.sh"
+sudo echo "$SCHEDULE root $SCRIPT_DIR/send_email.sh -p $SCRIPT_DIR >> $SCRIPT_DIR/log/email_history.log 2>&1" > "$CRON_DIR/$CRON_FILE"
 sudo chmod 600 "$CRON_DIR/$CRON_FILE"
