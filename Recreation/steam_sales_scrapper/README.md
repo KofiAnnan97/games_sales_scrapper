@@ -18,8 +18,13 @@ Officially tested on Ubuntu 24.04 and Windows 11.
     ```
 4. Add games and their respective price threshold using the [support commands](#supported-commands) below (supports commands from cargo).
 5. [Optional] Automate emails
-    - **For Unix-based systems:** Update and run set_cron.sh with root priviledges.
-    - **For Windows systems:** Update trigger variable to set the frequency of execution then run `set_task_scheduler.ps1`
+    - **For Unix-based systems:** Update *SCHEDULE* variable to desired execution frequency and run `set_cron.sh` with root privileges.
+    - **For Windows systems:** Update *$trigger* variable to desired execution frequency and run `set_task_scheduler.ps1`. 
+    
+        If Powershell scripts execution is not enabled run the following with administrative privileges: 
+        ```
+        Set-ExecutionPolicy RemoteSigned
+        ```
 
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.
