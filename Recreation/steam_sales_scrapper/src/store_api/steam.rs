@@ -7,21 +7,16 @@ use regex::Regex;
 use std::io;
 use std::io::Write;
 
+use crate::data::json;
+
+static cache_file_path : &str = "./steam_game_titles_cache.json";
+
 // Structs
 #[derive(Deserialize, Serialize, Debug)]
 pub struct App{
     #[serde(rename = "appid")]
     pub app_id: usize,
     pub name: String,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-struct Threshold{
-    name: String,
-    #[serde(rename="appid")]
-    app_id: usize,
-    currency: String,
-    desired_price: f64,
 }
 
 pub struct PriceOverview{
@@ -40,18 +35,7 @@ fn get_api_key() -> String {
 
 // Caching Functrions
 fn get_cache_path() -> String{
-    let cache_path_str = "./steam_game_titles_cache.json";
-    let path = Path::new(cache_path_str);
-    let mut cache_fp = String::from("");
-    if !path.is_file(){
-        File::create_new(cache_path_str).expect("Failed to create cache file");
-        println!("File created: {}", cache_fp);
-        cache_fp = path.display().to_string();
-    } 
-    else{
-        cache_fp = path.display().to_string();
-    }
-    return cache_fp;
+    return json::get_path(cache_file_path);
 }
 
 pub async fn load_cached_games() -> Result<Vec<App>> {
@@ -96,7 +80,7 @@ pub async fn update_cached_games(){
         }
     }
     let data_str = serde_json::to_string(&games_list).unwrap();
-    write_to_file(get_cache_path(), data_str);
+    json::write_to_file(get_cache_path(), data_str);
     println!("Cache update complete")
 }
 
@@ -248,9 +232,4 @@ pub async fn search_game(keyphrase: &str) -> Option<String>{
         Err(e) => println!("Error: {}", e)
     }
     None
-}
-
-// Helper Function
-fn write_to_file(path: String, data: String){
-    write(path, data).expect("Data could not be saved.");
 }
