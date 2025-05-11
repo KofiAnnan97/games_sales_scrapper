@@ -1,13 +1,11 @@
 use std::vec;
-use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use serde_json::{Value, json};
-use std::path::Path;
-use std::fs::{File, write, read_to_string, metadata};
+use std::fs::{read_to_string, metadata};
 
 use crate::data::json;
 
-static file_path : &str = "./config.json";
+static FILE_PATH : &str = "./config.json";
 
 pub fn get_available_stores() -> Vec<String> {
     return vec![
@@ -17,14 +15,13 @@ pub fn get_available_stores() -> Vec<String> {
 }
 
 fn get_path() -> String{
-    let path_str = json::get_path(file_path);
-    let path = Path::new(&path_str);
+    let path_str = json::get_path(FILE_PATH);
     match metadata(&path_str){
         Ok(md) => {
             if md.len() == 0 {
                 let settings = json!({"selected_stores": []});
                 let settings_str = serde_json::to_string(&settings);
-                json::write_to_file(file_path.to_string(), settings_str.expect("Initial settings could not be created.")); 
+                json::write_to_file(FILE_PATH.to_string(), settings_str.expect("Initial settings could not be created.")); 
             }
         },
         Err(e) => eprintln!("Error: {}", e)

@@ -1,4 +1,4 @@
-# Steam Sales Scrapper
+# Games Sales Scrapper
 The purpose of this script is to scrape the Steam Web API to determine whether a game has reached a specified price threshold. If one or more games fall below the user-defined limit an email will be sent containing a list of games along with their respective prices. 
 
 Officially tested on Ubuntu 24.04 and Windows 11.
@@ -26,33 +26,40 @@ Officially tested on Ubuntu 24.04 and Windows 11.
         Set-ExecutionPolicy RemoteSigned
         ```
 
+## Roadmap
+- [ ] Retrieve pricing data from Steam bundles
+
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.
-- `SEARCH` := find a game title based on keyphrase and add game with price threshold.
+- `config` := sets what store fronts are used to search for games. Use `-a` to search through all supported store fronts and can be configured to be more granular. 
     ```bash 
-    steam_sales_scrapper search --keyphrase <keyphrase>
+    game_sales_scrapper config -a
     ```
-- `ADD` := add a specified game (title must be exact to work).
+- `add` := add a specified game (title must be exact to work).
     ```bash 
-    steam_sales_scrapper add --title <title> --price <price>
+    game_sales_scrapper add --title <title> --price <price>
     ```
-- `UPDATE` := update price threshold for a specified game.
+- `update` := update price threshold for a specified game.
     ```bash 
-    steam_sales_scrapper update --title <title> --price <price>
+    game_sales_scrapper update --title <title> --price <price>
     ```
-- `REMOVE` := remove a specified game.
+- `remove` := remove a specified game.
     ```bash 
-    steam_sales_scrapper remove --title <title>
+    game_sales_scrapper remove --title <title>
     ```
-- `LIST` := list all the stored price thresholds for selected games.
+- `list-selected-stores` := list whether a store fronts is used to search for games.
     ```bash 
-    steam_sales_scrapper --list-all
+    game_sales_scrapper --list-selected-stores
     ```
-- `CACHE` := update the locally stored cache of steam games (title and app ids).
+- `list-thresholds` := list all the stored price thresholds for selected games.
     ```bash 
-    steam_sales_scrapper --update-cache
+    game_sales_scrapper --list-thresholds
     ```
-- `EMAIL` := sends an email (using SMTP) containing a list of games that are below user defined price threshold for each game. No email is sent if no game has reached their price threshold.
+- `update-cache` := update the locally stored cache of steam games (title and app ids).
     ```bash 
-    steam_sales_scrapper --send-email
+    game_sales_scrapper --update-cache
+    ```
+- `send-email` := sends an email (using SMTP) containing a list of games that are below user defined price threshold for each game. No email is sent if no game has reached their price threshold.
+    ```bash 
+    game_sales_scrapper --send-email
     ```

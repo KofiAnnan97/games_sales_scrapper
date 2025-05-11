@@ -1,15 +1,14 @@
 use dotenv::dotenv;
 use serde_json::{Result, Value, Error};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use std::fs::{File, write, read_to_string};
+use std::fs::read_to_string;
 use regex::Regex;
 use std::io;
 use std::io::Write;
 
 use crate::data::json;
 
-static cache_file_path : &str = "./steam_game_titles_cache.json";
+static CACHE_FILE_PATH : &str = "./steam_game_titles_cache.json";
 
 // Structs
 #[derive(Deserialize, Serialize, Debug)]
@@ -35,7 +34,7 @@ fn get_api_key() -> String {
 
 // Caching Functrions
 fn get_cache_path() -> String{
-    return json::get_path(cache_file_path);
+    return json::get_path(CACHE_FILE_PATH);
 }
 
 pub async fn load_cached_games() -> Result<Vec<App>> {
@@ -124,14 +123,19 @@ pub async fn get_price(app_id : usize) -> Result<PriceOverview>{
     match get_game_data(app_id).await {
         Ok(success) => {
             let body : Value = serde_json::from_str(&success).expect("Could convert to JSON");
-            let price_overview : &Value = &body[app_id.to_string()]["data"]["price_overview"];
             let data = body[app_id.to_string()]["success"].clone();
             match data{
                 serde_json::Value::Bool(true) => {
-                    overview.final_price = price_overview["final"].as_f64().unwrap()/100.0;
-                    overview.initial = price_overview["initial"].as_f64().unwrap()/100.0;
-                    overview.discount_percent = price_overview["discount_percent"].as_f64().unwrap() as usize;
-                    overview.currency = price_overview["currency"].to_string();
+                    let price_overview : &Value = &body[app_id.to_string()]["data"]["price_overview"];
+                    if *price_overview != Value::Null {
+                        overview.final_price = price_overview["final"].as_f64().unwrap()/100.0;
+                        overview.initial = price_overview["initial"].as_f64().unwrap()/100.0;
+                        overview.discount_percent = price_overview["discount_percent"].as_f64().unwrap() as usize;
+                        overview.currency = price_overview["currency"].to_string();
+                    }
+                    else{
+                        eprintln!("Could not find pricing data for {:?}", &body[app_id.to_string()]["data"]["name"]);
+                    }
                 },
                 serde_json::Value::Bool(false) => {
                     eprintln!("Error: No data available for game.");
@@ -200,33 +204,38 @@ async fn search_by_keyphrase(keyphrase: &str) -> Result<Vec<String>>{
 pub async fn search_game(keyphrase: &str) -> Option<String>{ 
     match search_by_keyphrase(keyphrase).await {
         Ok(search_list) => {
-            println!("Did you mean one of the following?");
-            for (idx, game_title) in search_list.iter().enumerate() {
-                println!("  [{}] {}", idx, game_title);
-            }
-            println!("  [q] Quit");
-            let mut input = String::new();
-            print!("Type integer corresponding to game title or type \"q\" to quit: ");
-            let _ = io::stdout().flush();
-            io::stdin()
-                .read_line(&mut input)
-                .expect("Failed to read user input");
-            if input.trim() == "q" {
-                eprintln!("Request terminated.");
+            if search_list.len() > 0 {
+                println!("Did you mean one of the following?");
+                for (idx, game_title) in search_list.iter().enumerate() {
+                    println!("  [{}] {}", idx, game_title);
+                }
+                println!("  [q] Quit");
+                let mut input = String::new();
+                print!("Type integer corresponding to game title or type \"q\" to quit: ");
+                let _ = io::stdout().flush();
+                io::stdin()
+                    .read_line(&mut input)
+                    .expect("Failed to read user input");
+                if input.trim() == "q" {
+                    eprintln!("Request terminated.");
+                }
+                else {
+                    match input.trim().parse::<usize>() {
+                        Ok(idx) => {
+                            if idx < search_list.len(){
+                                let title = search_list[idx].clone();
+                                return Ok::<std::string::String, Error>(title).ok();
+                            }
+                            else if idx >= search_list.len(){
+                                eprintln!("Integer \"{}\" is invalid. Request terminated.", idx);
+                            }
+                        },
+                        Err(e) => println!("Invalid input: {}\nError: {}", input, e)
+                    }
+                }
             }
             else {
-                match input.trim().parse::<usize>() {
-                    Ok(idx) => {
-                        if idx < search_list.len(){
-                            let title = search_list[idx].clone();
-                            return Ok::<std::string::String, Error>(title).ok();
-                        }
-                        else if idx >= search_list.len(){
-                            eprintln!("Integer \"{}\" is invalid. Request terminated.", idx);
-                        }
-                    },
-                    Err(e) => println!("Invalid input: {}\nError: {}", input, e)
-                }
+                println!("Could not find a game title matching \"{}\" on Steam", keyphrase);
             }
         }, 
         Err(e) => println!("Error: {}", e)

@@ -6,8 +6,7 @@ use std::f64;
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Game {
     pub title: String,
-    #[serde(rename = "id")]
-    pub gog_id: u64,
+    pub id: u64,
     pub price: PriceOverview,
 }
 
@@ -35,15 +34,6 @@ pub struct PriceOverview {
     bonus_credit_amount: String
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-struct Threshold{
-    name: String,
-    steam_id: usize,
-    gog_id: u64,
-    currency: String,
-    desired_price: f64,
-}
-
 pub async fn search_game_by_title(title: &str) -> Result<Vec<Game>> {
     let http_client = reqwest::Client::new();
     let media_type = "game";
@@ -59,11 +49,6 @@ pub async fn search_game_by_title(title: &str) -> Result<Vec<Game>> {
     let body : Value = serde_json::from_str(&resp).expect("Could not convert to JSON");
     let products = serde_json::to_string(&body["products"]).unwrap();
     let games_list : Vec<Game> = serde_json::from_str::<Vec<Game>>(&products)?;
-    // Remove commas at the beginning and end of title
-    /*for elem in games_list.iter_mut() {
-        //let new_title = &elem.title[1..elem.title.len()-1];
-        elem.title = elem.title[1..elem.title.len()-1].to_string();
-    }*/
     Ok(games_list)
 }
 
@@ -77,7 +62,7 @@ pub fn get_price_from_list(title:&str, games_list: Vec<Game>) -> Option<f64> {
     None
 }
 
-pub async fn get_price_data(title: &str) -> Option<PriceOverview> {
+pub async fn get_price(title: &str) -> Option<PriceOverview> {
     let http_client = reqwest::Client::new();
     let media_type = "game";
     let limit_num : i32 = 30;
