@@ -26,9 +26,9 @@ Officially tested on Ubuntu 24.04 and Windows 11.
     SMTP_PWD={stmp_password}
     ```
 4. Add games and their respective price threshold using the [support commands](#supported-commands) below (supports commands from cargo).
-5. [Optional] Automate emails
+5. [Optional] Automate emails (in `setup/` folder)
     - **For Unix-based systems:** Update *SCHEDULE* variable to desired execution frequency and run `set_cron.sh` with root privileges.
-    - **For Windows systems:** Update *$trigger* variable to desired execution frequency and run `set_task_scheduler.ps1`. 
+    - **For Windows systems:** Update *$trigger* variable to desired execution frequency and run `task_scheduler.ps1 -Cmd "create"`. 
     
         If Powershell scripts execution is not enabled run the following with administrative privileges: 
         ```
