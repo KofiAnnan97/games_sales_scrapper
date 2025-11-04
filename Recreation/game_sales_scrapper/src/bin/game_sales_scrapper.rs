@@ -5,9 +5,9 @@ use clap::{arg, command, Arg, ArgAction, Command, ArgMatches};
 use clap::parser::ValueSource;
 
 // Internal libraries
-use game_sales_scrapper::store_api::{steam, gog}; //, humble_bundle};
-use game_sales_scrapper::email::mailer;
-use game_sales_scrapper::data::{csv, settings, thresholds};
+use game_sales_scrapper::stores::{steam, gog}; //, humble_bundle};
+use game_sales_scrapper::alerting::email;
+use game_sales_scrapper::file_ops::{csv, settings, thresholds};
 
 fn get_recipient() -> String {
     dotenv().ok();
@@ -436,7 +436,7 @@ async fn main(){
                 else {
                     println!("Sending email...");
                     let to_address = &get_recipient();
-                    mailer::send_email(to_address, "Steam Games At Desired Prices",&email_str);
+                    email::send(to_address, "Steam Games At Desired Prices",&email_str);
                 }
             }
             else { println!("No/incorrect command given. Use \'--help\' for assistance."); }

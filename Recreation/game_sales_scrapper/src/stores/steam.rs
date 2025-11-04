@@ -6,7 +6,7 @@ use regex::Regex;
 use std::io;
 use std::io::Write;
 
-use crate::data::json;
+use crate::file_ops::json;
 
 static CACHE_FILENAME : &str = "steam_game_titles_cache.json";
 

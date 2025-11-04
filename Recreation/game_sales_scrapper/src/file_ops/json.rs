@@ -21,12 +21,12 @@ pub fn write_to_file(path: String, data: String){
 
 pub fn get_data_path() -> String {
     dotenv().ok();
-    let mut data_path = String::from(".");
-    match std::env::var("PRGM_PATH") {
-        Ok(path) =>  data_path = path,
-        Err(_) => println!("\'PRGM_PATH\' was not set in .env")
-    }
+    let mut data_path = match std::env::var("PROJECT_PATH") {
+        Ok(path) => path,
+        Err(_) => String::from("."),
+    };
     data_path.push_str("/data");
+    //println!("Path: {}", data_path);
     if Path::new(&data_path).is_dir() != true {
         let _ = fs::create_dir(&data_path);
     }

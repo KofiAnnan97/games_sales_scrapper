@@ -4,7 +4,7 @@ use serde_json::Result;
 use serde_json::{Value, json};
 use std::fs::{read_to_string, metadata};
 
-use crate::data::json;
+use crate::file_ops::json;
 
 static CONFIG_FILENAME : &str = "config.json";
 

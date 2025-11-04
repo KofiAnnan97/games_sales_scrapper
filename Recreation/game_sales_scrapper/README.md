@@ -27,7 +27,10 @@ Officially tested on Ubuntu 24.04 and Windows 11.
     SMTP_EMAIL={smtp_email_address}
     SMTP_USERNAME={smtp_username}
     SMTP_PWD={stmp_password}
+    PROJECT_PATH={/path/to/game_sales_scrapper}
     ```
+    For Windows use `\\` when defining the path.
+
 4. Add games and their respective price threshold using the [support commands](#supported-commands) below (supports commands from cargo).
 5. [Optional] Automate emails (in `setup/` folder)
     - **For Unix-based systems:** Update *SCHEDULE* variable to desired execution frequency and run `set_cron.sh` with root privileges.

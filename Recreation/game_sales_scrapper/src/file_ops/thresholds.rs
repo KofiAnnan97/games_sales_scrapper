@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use std::fs::read_to_string;
 
-use crate::data::{json, settings};
-use crate::store_api::{steam, gog}; //, humble_bundle};
+use crate::file_ops::{json, settings};
+use crate::stores::{steam, gog}; //, humble_bundle};
 
 static THRESHOLD_FILENAME : &str = "thresholds.json";
 
