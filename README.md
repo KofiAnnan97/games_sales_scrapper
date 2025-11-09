@@ -29,12 +29,12 @@ Officially tested on Ubuntu 24.04 and Windows 11.
     SMTP_PWD={stmp_password}
     PROJECT_PATH={/path/to/game_sales_scrapper}
     ```
-    For Windows use `\\` when defining the path.
+    - For Windows use `\\` when defining the path.
 
 4. Add games and their respective price threshold using the [support commands](#supported-commands) below (supports commands from cargo).
 5. [Optional] Automate emails (in `setup/` folder)
-    - **For Unix-based systems:** Update *SCHEDULE* variable to desired execution frequency and run `set_cron.sh` with root privileges.
-    - **For Windows systems:** Update *$trigger* variable to desired execution frequency and run `task_scheduler.ps1 -Cmd "create"`. 
+    - **For Unix-based systems:** Update *SCHEDULE* variable to desired execution frequency and run `set_cron.sh -c "create"` with root privileges.
+    - **For Windows systems:** Update *$trigger* variable to desired execution frequency and run `set_task_scheduler.ps1 -Cmd "create"`. 
     
         If Powershell scripts execution is not enabled run the following with administrative privileges: 
         ```
@@ -43,7 +43,7 @@ Officially tested on Ubuntu 24.04 and Windows 11.
 
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.
-- `config` := sets what store fronts are used to search for games and enable aliases for game titles (on by default). Use `-a` to search through all supported store fronts and can be configured to be more granular. 
+- `config` := sets what storefronts are used to search for games and enable aliases for game titles (on by default). Use `-a` to search through all supported storefronts and can be configured to be more granular. 
     ```commandline
     game_sales_scrapper config -a
     ```
