@@ -7,6 +7,7 @@ use clap::parser::ValueSource;
 // Internal libraries
 use game_sales_scrapper::stores::{steam, gog}; //, humble_bundle};
 use game_sales_scrapper::alerting::email;
+use game_sales_scrapper::alerting::email::SaleInfo;
 use game_sales_scrapper::file_ops::{csv, settings, thresholds};
 
 fn get_recipient() -> String {
@@ -128,6 +129,63 @@ async fn check_prices() -> String {
         humble_bundle_output = "\n\nHumble Bundle price thresholds that have been met:".to_owned() + &humble_bundle_output;
     }*/
     let output = steam_output + &gog_output; // + &humble_bundle_output;
+    return output;
+}
+
+async fn check_prices_v2() -> String {
+    let mut thresholds : Vec<thresholds::GameThreshold> = Vec::new();
+    match thresholds::load_data(){
+        Ok(data) => thresholds = data,
+        Err(e) => println!("Error: {}", e)
+    }
+    let mut steam_sales: Vec<email::SaleInfo> = Vec::new();
+    let mut gog_sales: Vec<email::SaleInfo> = Vec::new();
+    let http_client = reqwest::Client::new();
+    for elem in thresholds.iter(){
+        if elem.steam_id != 0 {
+            match steam::get_price(elem.steam_id, &http_client).await {
+                Ok(po) => {
+                    if elem.desired_price >= po.final_price {
+                        steam_sales.push(SaleInfo{
+                            title: elem.title.clone(),
+                            original_price: po.initial.to_string(),
+                            current_price: po.final_price.to_string(),
+                            discout_percentage: po.discount_percent.to_string(),
+                        });
+                    }
+                },
+                Err(e) => println!("{}", e)
+            }
+        }
+        if elem.gog_id != 0 {
+            match gog::get_price_v2(&elem.title, &http_client).await {
+                Some(po) => {
+                    let current_price = po.final_money.amount.parse::<f64>().unwrap();
+                    if elem.desired_price >= current_price {
+                        let discount: String = match po.discount {
+                            Some(d) => d,
+                            None => String::new(),
+                        };
+                        gog_sales.push(SaleInfo{
+                            title: elem.title.clone(),
+                            original_price: po.base_money.amount,
+                            current_price: po.final_money.amount,
+                            discout_percentage: if !discount.is_empty() { discount[1..].to_string() } else { String::from("0") },
+                        });
+                    }
+                },
+                None => ()
+            }
+        }
+    }
+    let mut output = String::new();
+    if !steam_sales.is_empty(){
+        output.push_str(&email::create_storefront_table_html("Steam", steam_sales));
+    }
+    println!("{:?}", gog_sales);
+    if !gog_sales.is_empty(){
+        output.push_str(&email::create_storefront_table_html("Good Old Games (GOG)", gog_sales));
+    }
     return output;
 }
 
@@ -430,13 +488,13 @@ async fn main(){
                 steam::update_cached_games().await;
             }
             else if cmd.get_flag("email"){
-                let email_str = check_prices().await;
+                let email_str = check_prices_v2().await;
                 println!("Email Contents:\n{}\n", email_str);
                 if email_str.is_empty(){ println!("No game(s) on sale at price thresholds"); }
                 else {
                     println!("Sending email...");
                     let to_address = &get_recipient();
-                    email::send(to_address, "Steam Games At Desired Prices",&email_str);
+                    email::send_with_html(to_address, "Check Out Which Games Are On Sale",&email_str);
                 }
             }
             else { println!("No/incorrect command given. Use \'--help\' for assistance."); }
