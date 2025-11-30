@@ -7,5 +7,5 @@ pub struct SaleInfo{
     pub original_price: String,
     pub current_price: String,
     pub discount_percentage: String,
-    //pub store_page_link: String,
+    pub store_page_link: String,
 }

@@ -77,14 +77,20 @@ pub fn create_storefront_table_html(store_name: &str, sales: Vec<structs::SaleIn
     let mut rows = String::new(); 
     for s_info in sales{
         rows += &format!("<tr>
-                <td><img src=\"{icon}\" alt=\"{title}\"> </td>
-                <td style=\"text-align: left;\">{title}</td>
+                <td>
+                    <a href=\"{store_page}\">
+                        <img src=\"{icon}\" alt=\"{title}\">
+                    </a>
+                </td>
+                <td style=\"text-align: left;\">
+                    <a href=\"{store_page}\">{title}</a>
+                </td>
                 <td><del>${old_price}</del> ${new_price}</td>
                 <td style=\"text-align: center;\">({price_off}% off)</td>
             </tr>", 
         icon=s_info.icon_link, title=s_info.title,
         old_price=s_info.original_price, new_price=s_info.current_price, 
-        price_off=s_info.discount_percentage);
+        price_off=s_info.discount_percentage, store_page=s_info.store_page_link);
     }
     let data = format!(r#"
         <h2 class="storefront">{}</h2>

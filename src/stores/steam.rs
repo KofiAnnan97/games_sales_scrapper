@@ -165,6 +165,7 @@ pub async fn get_price_details(app_id : usize, client: &reqwest::Client) -> Resu
         original_price: String::new(),
         current_price: String::new(),
         discount_percentage: String::new(),
+        store_page_link: String::new(),
     };
     match get_game_data(app_id, &client).await {
         Ok(success) => {
@@ -179,6 +180,7 @@ pub async fn get_price_details(app_id : usize, client: &reqwest::Client) -> Resu
                         sale_info.original_price = format!("{}", data["price_overview"]["initial"].as_f64().unwrap()/100.0);
                         sale_info.current_price = format!("{}", data["price_overview"]["final"].as_f64().unwrap()/100.0);
                         sale_info.discount_percentage = format!("{}", data["price_overview"]["discount_percent"].as_f64().unwrap() as usize);
+                        sale_info.store_page_link = format!("https://store.steampowered.com/app/{}", app_id);
                     }
                     else{
                         eprintln!("Could not find pricing data for {:?}", &body[app_id.to_string()]["data"]["name"]);

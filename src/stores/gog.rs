@@ -110,7 +110,7 @@ pub struct GameInfo {
     pub price: Option<Price>,
     #[serde(rename="coverHorizontal")]
     pub c_horizontal: String,
-    #[serde(rename="storeLink", skip)]
+    #[serde(rename="storeLink")]
     pub store_link: String,
     #[serde(rename="coverVertical", skip)]
     cover: String,
@@ -250,7 +250,6 @@ pub async fn get_price_details(title: &str, http_client: &reqwest::Client) -> Op
         .await
         .expect("Failed to get data");
     let body: Value = serde_json::from_str(&resp).expect("Could not convert to JSON");
-    //println!("Original: {:?}\n", body["products"]);
     if let Some(products) = body["products"].as_array() {
         let first_product = serde_json::to_string(&products[0]).unwrap();
         let data = serde_json::from_str::<GameInfo>(&first_product).unwrap();
@@ -262,7 +261,7 @@ pub async fn get_price_details(title: &str, http_client: &reqwest::Client) -> Op
                     current_price: po.final_money.amount, 
                     discount_percentage: po.final_money.discount,
                     icon_link: data.c_horizontal,
-                    //store_page_link: data.store_link,
+                    store_page_link: data.store_link,
                 }).ok();
             },
             None => (),
