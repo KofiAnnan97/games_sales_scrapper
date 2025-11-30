@@ -1,18 +1,9 @@
 use lettre::{Message, SmtpTransport, Transport};
 use lettre::message::{Mailbox, MultiPart, SinglePart};
 use lettre::transport::smtp::authentication::{Credentials, Mechanism};
-use serde::{Deserialize, Serialize};
 use dotenv::dotenv;
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct SaleInfo{
-    //pub icon_html: String,
-    pub title: String,
-    pub original_price: String,
-    pub current_price: String,
-    pub discout_percentage: String,
-    //pub store_page_link: String,
-}
+use crate::file_ops::structs;
 
 pub fn send(recipient: &str, subject: &str, body: &str) {
     dotenv().ok();
@@ -48,6 +39,12 @@ pub fn send(recipient: &str, subject: &str, body: &str) {
 pub fn get_stylesheet() -> String {
     return String::from(r#"
         <style>
+            img {
+                max-width: auto;
+                max-height: 100px;
+                display: block;
+                margin: auto;
+            }
             table {
                 border-collapse: collapse;
                 width: 100%;
@@ -76,16 +73,18 @@ pub fn get_stylesheet() -> String {
     "#);
 }
 
-pub fn create_storefront_table_html(store_name: &str, sales: Vec<SaleInfo>) -> String{
+pub fn create_storefront_table_html(store_name: &str, sales: Vec<structs::SaleInfo>) -> String{
     let mut rows = String::new(); 
     for s_info in sales{
         rows += &format!("<tr>
-                <td style=\"text-align: left;\">{}</td>
-                <td><del>${}</del> ${}</td>
-                <td style=\"text-align: center;\">({}% off)</td>
+                <td><img src=\"{icon}\" alt=\"{title}\"> </td>
+                <td style=\"text-align: left;\">{title}</td>
+                <td><del>${old_price}</del> ${new_price}</td>
+                <td style=\"text-align: center;\">({price_off}% off)</td>
             </tr>", 
-        s_info.title, s_info.original_price, 
-        s_info.current_price, s_info.discout_percentage);
+        icon=s_info.icon_link, title=s_info.title,
+        old_price=s_info.original_price, new_price=s_info.current_price, 
+        price_off=s_info.discount_percentage);
     }
     let data = format!(r#"
         <h2 class="storefront">{}</h2>

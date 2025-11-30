@@ -1,4 +1,5 @@
 use dotenv::dotenv;
+use game_sales_scrapper::gog::Price;
 use std::io::Write;
 use std::io;
 use clap::{arg, command, Arg, ArgAction, Command, ArgMatches};
@@ -6,9 +7,10 @@ use clap::parser::ValueSource;
 
 // Internal libraries
 use game_sales_scrapper::stores::{steam, gog}; //, humble_bundle};
+//use game_sales_scrapper::stores::gog::HtmlInfo;
 use game_sales_scrapper::alerting::email;
-use game_sales_scrapper::alerting::email::SaleInfo;
-use game_sales_scrapper::file_ops::{csv, settings, thresholds};
+use game_sales_scrapper::file_ops::{csv, settings, thresholds, 
+                                   structs::{SaleInfo}};
 
 fn get_recipient() -> String {
     dotenv().ok();
@@ -138,40 +140,27 @@ async fn check_prices_v2() -> String {
         Ok(data) => thresholds = data,
         Err(e) => println!("Error: {}", e)
     }
-    let mut steam_sales: Vec<email::SaleInfo> = Vec::new();
-    let mut gog_sales: Vec<email::SaleInfo> = Vec::new();
+    let mut steam_sales: Vec<SaleInfo> = Vec::new();
+    let mut gog_sales: Vec<SaleInfo> = Vec::new();
     let http_client = reqwest::Client::new();
     for elem in thresholds.iter(){
         if elem.steam_id != 0 {
-            match steam::get_price(elem.steam_id, &http_client).await {
-                Ok(po) => {
-                    if elem.desired_price >= po.final_price {
-                        steam_sales.push(SaleInfo{
-                            title: elem.title.clone(),
-                            original_price: po.initial.to_string(),
-                            current_price: po.final_price.to_string(),
-                            discout_percentage: po.discount_percent.to_string(),
-                        });
+            match steam::get_price_details(elem.steam_id, &http_client).await {
+                Ok(info) => {
+                    let current_price = info.current_price.parse::<f64>().unwrap();
+                    if elem.desired_price >= current_price {
+                        steam_sales.push(info);
                     }
                 },
                 Err(e) => println!("{}", e)
             }
         }
         if elem.gog_id != 0 {
-            match gog::get_price_v2(&elem.title, &http_client).await {
-                Some(po) => {
-                    let current_price = po.final_money.amount.parse::<f64>().unwrap();
+            match gog::get_price_details(&elem.title, &http_client).await {
+                Some(info) => {
+                    let current_price = info.current_price.parse::<f64>().unwrap();
                     if elem.desired_price >= current_price {
-                        let discount: String = match po.discount {
-                            Some(d) => d,
-                            None => String::new(),
-                        };
-                        gog_sales.push(SaleInfo{
-                            title: elem.title.clone(),
-                            original_price: po.base_money.amount,
-                            current_price: po.final_money.amount,
-                            discout_percentage: if !discount.is_empty() { discount[1..].to_string() } else { String::from("0") },
-                        });
+                        gog_sales.push(info);
                     }
                 },
                 None => ()
@@ -182,7 +171,6 @@ async fn check_prices_v2() -> String {
     if !steam_sales.is_empty(){
         output.push_str(&email::create_storefront_table_html("Steam", steam_sales));
     }
-    println!("{:?}", gog_sales);
     if !gog_sales.is_empty(){
         output.push_str(&email::create_storefront_table_html("Good Old Games (GOG)", gog_sales));
     }
