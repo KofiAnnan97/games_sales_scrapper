@@ -120,7 +120,7 @@ async fn gog_insert_sequence(alias: &str, title: &str, price: f64, client: &reqw
         Ok(data) => search_list = data,
         Err(e) => println!("Search GOG Game Error: {}", e)
     }
-    if search_list.len() > 0 {
+    if !search_list.is_empty() {
         println!("GOG search results:");
         for (i, game) in search_list.iter().enumerate(){
             println!("  [{}] {}", i, game.title);
@@ -162,7 +162,7 @@ async fn microsoft_store_insert_sequence(alias: &str, title: &str, price: f64, c
         Ok(data) => search_list = data,
         Err(e) => println!("Search Microsoft Store Error: {}", e)
     }
-    if search_list.len() > 0 {
+    if !search_list.is_empty() {
         println!("Microsoft Store search results:");
         for(i, game) in search_list.iter().enumerate(){
             println!("  [{}] {}", i, game.title);

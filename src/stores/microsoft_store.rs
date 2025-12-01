@@ -211,22 +211,19 @@ pub struct ProductRating {
 }
 
 pub async fn search_game_by_title(title: &str, http_client: &reqwest::Client) -> Result<Vec<GameInfo>> {
-    let country_code = "US";
-    let locale = "en-US";
-    let media_type = "games";
-    let querystring = [
+    let query_string = [
         ("query", title),
-        ("mediaType", media_type),
+        ("mediaType", "games"),
         ("age", "all"),
         ("price", "all"),
         ("category", "all"),
         ("subscription", "none"),
-        ("gl", country_code),
-        ("hl", locale),
+        ("gl", "US"),
+        ("hl", "en-US"),
     ];
     let url = format!("{}{}", BASE_URL, SEARCH_ENDPOINT);
     let resp = http_client.get(url)
-        .query(&querystring)
+        .query(&query_string)
         .send()
         .await
         .expect("Failed to get response")

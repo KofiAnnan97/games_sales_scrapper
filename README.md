@@ -9,15 +9,16 @@ applicable games.
 | Ubuntu 24.04     | :white_check_mark:  |
 | Windows 11       | :white_check_mark:  |
 
-Roadmap [[link](./Roadmap.md)]
+Roadmap: [[link](./Roadmap.md)]
 
-### Supported Stores
+### Supported Storefronts
 - **Steam**
 - **Good Old Games (GOG)**
+- **Microsoft Store (PC)**
 
 ## Quick Start
 1. Setup SMTP server/service (TLS required/optional)
-2. Nagivate to project folder and run `cargo build`
+2. Nagivate to project folder and run `cargo build --release`
 3. In the project folder, create `.env` with the following:
     ```
     STEAM_API_KEY={your_steam_api_key}

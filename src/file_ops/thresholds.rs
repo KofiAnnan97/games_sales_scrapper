@@ -22,8 +22,8 @@ pub fn load_data() -> Result<Vec<GameThreshold>> {
     return temp;
 }
 
-fn is_threshold(title: &str, thres: &GameThreshold) -> bool {
-    return title == thres.title || title == thres.alias;
+fn is_threshold(title: &str, game_thresh: &GameThreshold) -> bool {
+    title == game_thresh.title || title == game_thresh.alias
 }
 
 pub async fn add_steam_game(new_alias: String, app: steam::Game, price: f64, client: &reqwest::Client){
@@ -147,11 +147,7 @@ pub fn set_game_alias() -> String {
 }
 
 pub fn update_alias(title: &str, new_alias: &str){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("update_price Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none() {
         let i = idx.unwrap();
@@ -165,11 +161,7 @@ pub fn update_alias(title: &str, new_alias: &str){
 }
 
 pub fn update_price(title: &str, price: f64) {
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none() {
         let i = idx.unwrap();
@@ -192,11 +184,7 @@ pub fn update_price(title: &str, price: f64) {
 }
 
 pub fn update_id(title: &str, store_type: &str, id: usize){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     //println!("{:?}", idx);
     if !idx.is_none() {
@@ -226,11 +214,7 @@ pub fn update_id(title: &str, store_type: &str, id: usize){
 }
 
 pub fn update_id_str(title: &str, store_type: &str, id: &str){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none() {
         let mut updated_id : bool = false;
@@ -254,11 +238,7 @@ pub fn update_id_str(title: &str, store_type: &str, id: &str){
 }
 
 pub fn remove(title: &str){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => println!("Error: {}", e)
-    }
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none(){
         thresholds.remove(idx.unwrap());

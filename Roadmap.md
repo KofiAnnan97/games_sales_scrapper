@@ -15,5 +15,6 @@
 ### Backlog
 - Retrieve pricing data from Steam bundles 
 - Retrieve pricing data from game editions on GOG
+- Show the game MSRP for microsoft store during add phase
 - Set up Humble Bundle Storefront
 - Fix alias not apply to multiple threshold entries (same product different name/edition)

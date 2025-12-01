@@ -94,10 +94,14 @@ pub async fn update_cached_games(){
 
 // API Functions 
 async fn get_all_games(client: &reqwest::Client) -> Result<String> {
-    let steam_key = get_api_key();
-    let format = "json";
-    let url = format!("{}{}/?key={}&format={}", API_BASE_URL, SEARCH_ENDPOINT, steam_key, format);
+    let steam_api_key = get_api_key();
+    let query_string = [
+        ("key", steam_api_key.as_str()),
+        ("format", "json"),
+    ];
+    let url = format!("{}{}/", API_BASE_URL, SEARCH_ENDPOINT);
     let resp = client.get(url)
+        .query(&query_string)
         .send()
         .await
         .expect("Failed to get response")
@@ -108,9 +112,14 @@ async fn get_all_games(client: &reqwest::Client) -> Result<String> {
 }
 
 async fn get_game_data(app_id : usize, client: &reqwest::Client) -> Result<String>{
-    let filters = "basic,price_overview";
-    let url = format!("{}{}?appids={}&filters={}", STORE_BASE_URL, DETAILS_ENDPOINT, app_id, filters);
+    let app_id_str = app_id.to_string();
+    let query_string = [
+        ("appids", app_id_str.as_str()),
+        ("filters", "basic,price_overview"),
+    ];
+    let url = format!("{}{}", STORE_BASE_URL, DETAILS_ENDPOINT);
     let resp = client.get(url)
+        .query(&query_string)
         .send()
         .await
         .expect("Failed to get response")
@@ -207,7 +216,7 @@ pub async fn check_game(name: &str) -> Option<Game> {
         Ok(data) => games_list = data,
         Err(e) => println!("Error: {}", e)
     }
-    if games_list.len() == 0 {
+    if games_list.is_empty() {
         update_cached_games().await;
         match load_cached_games().await {
             Ok(data) => games_list = data,
@@ -253,7 +262,7 @@ async fn search_by_keyphrase(keyphrase: &str) -> Result<Vec<String>>{
 pub async fn search_game(keyphrase: &str) -> Option<String>{
     match search_by_keyphrase(keyphrase).await {
         Ok(search_list) => {
-            if search_list.len() > 0 {
+            if !search_list.is_empty() {
                 println!("Steam search results:");
                 for (idx, game_title) in search_list.iter().enumerate() {
                     println!("  [{}] {}", idx, game_title);

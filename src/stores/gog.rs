@@ -184,16 +184,21 @@ pub struct FinalMoney {
 }
 
 pub async fn search_game_by_title_v2(title: &str, http_client: &reqwest::Client) -> Result<Vec<GameInfo>>{
-    let limit = 48;
-    let order = "desc:score";
-    let product_type = "in:game";
-    let page = 1;
-    let country_code = "US";
-    let locale = "en-US";
-    let currency = "USD";
-    let url = format!("{}{}?limit={}&query=like:{}&order={}&productType={}&page={}&countryCode={}&locale={}&currencyCode={}", 
-                      BASE_URL, CATALOG_ENDPOINT, limit, title, order, product_type, page, country_code, locale, currency);
+    let mut like_title = String::from("like:");
+    like_title.push_str(title);
+    let query_string = [
+        ("query", like_title.as_str()),
+        ("limit", "48"),
+        ("order", "desc:score"),
+        ("productType", "in:game"),
+        ("page", "1"),
+        ("countryCode", "US"),
+        ("locale", "en-US"),
+        ("currencyCode", "USD"),
+    ];
+    let url = format!("{}{}", BASE_URL, CATALOG_ENDPOINT);
     let resp = http_client.get(url)
+        .query(&query_string)
         .send()
         .await
         .expect("Failed to get response")
@@ -203,46 +208,25 @@ pub async fn search_game_by_title_v2(title: &str, http_client: &reqwest::Client)
     let body : Value = serde_json::from_str(&resp).expect("Could not convert GOG search to JSON");
     let products = serde_json::to_string(&body["products"]).unwrap();
     let games_list : Vec<GameInfo> = serde_json::from_str::<Vec<GameInfo>>(&products)?;
-    Ok(games_list)    
-}
-
-pub async fn get_price_v2(title: &str, http_client: &reqwest::Client) -> Option<Price> {
-    let limit = 1;
-    let order = "desc:score";
-    let product_type = "in:game";
-    let page = 1;
-    let country_code = "US";
-    let locale = "en-US";
-    let currency = "USD";
-    let url = format!("{}{}?limit={}&query=like:{}&order={}&productType={}&page={}&countryCode={}&locale={}&currencyCode={}", 
-                      BASE_URL, CATALOG_ENDPOINT, limit, title, order, product_type, page, country_code, locale, currency);
-    let resp = http_client.get(url)
-        .send()
-        .await
-        .expect("Failed to get response")
-        .text()
-        .await
-        .expect("Failed to get data");
-    let body: Value = serde_json::from_str(&resp).expect("Could not convert to JSON");
-    if let Some(products) = body["products"].as_array() {
-        let price_data = serde_json::to_string(&products[0]["price"]).unwrap();
-        let price = serde_json::from_str::<Price>(&price_data).unwrap();
-        return Ok::<Price, Error>(price).ok();
-    }
-    None 
+    Ok(games_list)
 }
 
 pub async fn get_price_details(title: &str, http_client: &reqwest::Client) -> Option<SaleInfo> {
-    let limit = 1;
-    let order = "desc:score";
-    let product_type = "in:game";
-    let page = 1;
-    let country_code = "US";
-    let locale = "en-US";
-    let currency = "USD";
-    let url = format!("{}{}?limit={}&query=like:{}&order={}&productType={}&page={}&countryCode={}&locale={}&currencyCode={}", 
-                      BASE_URL, CATALOG_ENDPOINT, limit, title, order, product_type, page, country_code, locale, currency);
+    let mut like_title = String::from("like:");
+    like_title.push_str(title);
+    let query_string = [
+        ("query", like_title.as_str()),
+        ("limit", "1"),
+        ("order", "desc:score"),
+        ("productType", "in:game"),
+        ("page", "1"),
+        ("countryCode", "US"),
+        ("locale", "en-US"),
+        ("currencyCode", "USD"),
+    ];
+    let url = format!("{}{}", BASE_URL, CATALOG_ENDPOINT);
     let resp = http_client.get(url)
+        .query(&query_string)
         .send()
         .await
         .expect("Failed to get response")
