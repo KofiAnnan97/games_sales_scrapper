@@ -1,22 +1,15 @@
-use serde::{Deserialize, Serialize};
+use std::io::{self, Write};
 use serde_json::Result;
 use std::fs::read_to_string;
 
 use crate::file_ops::{json, settings};
-use crate::stores::{steam, gog}; //, humble_bundle};
+use crate::stores::{steam, gog, microsoft_store};
+use crate::structs::steam_response::Game;
+use crate::structs::gog_response::GameInfo as GOGGameInfo;
+use crate::structs::microsoft_store_response::ProductInfo;
+use crate::structs::data::GameThreshold;
 
 static THRESHOLD_FILENAME : &str = "thresholds.json";
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct GameThreshold{
-    pub title: String,
-    pub alias: String,
-    pub steam_id: usize,
-    pub gog_id: usize,
-    //pub humble_bundle_id: String,
-    pub currency: String,
-    pub desired_price: f64,
-}
 
 pub fn get_path() -> String {
     let mut thresh_path = json::get_data_path();
@@ -32,16 +25,12 @@ pub fn load_data() -> Result<Vec<GameThreshold>> {
     return temp;
 }
 
-fn is_threshold(title: &str, thres: &GameThreshold) -> bool {
-    return title == thres.title || title == thres.alias;
+fn is_threshold(title: &str, game_thresh: &GameThreshold) -> bool {
+    title == game_thresh.title || title == game_thresh.alias
 }
 
-pub async fn add_steam_game(new_alias: String, app: steam::Game, price: f64, client: &reqwest::Client){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => println!("Error: {}", e)
-    }
+pub async fn add_steam_game(new_alias: String, app: Game, price: f64, client: &reqwest::Client){
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     match steam::get_price(app.app_id, &client).await {
         Ok(po) => {
             let mut unique : bool = true;
@@ -60,7 +49,7 @@ pub async fn add_steam_game(new_alias: String, app: steam::Game, price: f64, cli
                     alias: new_alias,
                     steam_id: app.app_id.clone(),
                     gog_id: 0,
-                    //humble_bundle_id: "".to_string(),
+                    microsoft_store_id: String::new(),
                     currency: po.currency[1..po.currency.len()-1].to_string(),
                     desired_price: price
                 });
@@ -74,12 +63,8 @@ pub async fn add_steam_game(new_alias: String, app: steam::Game, price: f64, cli
     }
 }
 
-pub fn add_gog_game(new_alias: String, game: &gog::GameInfo, price: f64){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => println!("Error: {}", e)
-    }
+pub fn add_gog_game(new_alias: String, game: &GOGGameInfo, price: f64){
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let mut unique : bool = true;
     for elem in thresholds.iter(){
         if is_threshold(&game.title, elem){
@@ -92,17 +77,16 @@ pub fn add_gog_game(new_alias: String, game: &gog::GameInfo, price: f64){
         }
     }
     if unique { 
-        let mut currency_code = String::new();
-        match &game.price {
-            Some(price_data) => currency_code = price_data.base_money.currency.clone(),
-            None => currency_code = "USD".to_string(),
-        }
+        let currency_code = match &game.price {
+            Some(price_data) => price_data.base_money.currency.clone(),
+            None => "USD".to_string(),
+        };
         thresholds.push(GameThreshold {
             title: game.title.clone(),
             alias: new_alias,
             steam_id: 0,
             gog_id: game.id.parse::<u64>().unwrap() as usize,
-            //humble_bundle_id: "".to_string(),
+            microsoft_store_id: String::new(),
             //currency: game.price.currency.clone(), // Version 1
             currency: currency_code,
             desired_price: price
@@ -114,44 +98,59 @@ pub fn add_gog_game(new_alias: String, game: &gog::GameInfo, price: f64){
     //else { println!("Duplicate title: \"{}\".", game.title); }
 }
 
-/*pub fn add_humble_bundle_game(new_alias: String, game: &humble_bundle::GameInfo, price: f64){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => println!("Error: {}", e)
-    }
+pub fn add_microsoft_store_game(new_alias: String, game: &ProductInfo, price: f64){
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let mut unique : bool = true;
     for elem in thresholds.iter(){
-        if is_threshold(&game.human_name, elem){
+        if is_threshold(&game.title, elem){
             unique = false;
-            if elem.humble_bundle_id.len() == 0 {
-                update_id_str(&elem.title, settings::HUMBLE_BUNDLE_STORE_ID, &game.human_name);
+            if elem.microsoft_store_id.is_empty() {
+                let game_id = &game.product_id;
+                update_id_str(&elem.title, settings::MICROSOFT_STORE_ID, game_id);
             }
             break;
         }
     }
-    if unique { 
-        thresholds.push(GameThreshold {
-            title: game.human_name.clone(),
+    if unique {
+        thresholds.push(GameThreshold{
+            title: game.title.clone(),
             alias: new_alias,
             steam_id: 0,
             gog_id: 0,
-            humble_bundle_id: game.human_url.to_string(),
-            currency: game.current_price.currency.clone(),
+            microsoft_store_id: game.product_id.clone(),
+            currency: String::new(),
             desired_price: price
         });
         let data_str = serde_json::to_string(&thresholds).unwrap();
         json::write_to_file(get_path(), data_str);
-        println!("Successfully added Humble Bundle game \"{}\".", game.human_name);
+        println!("Successfully added Microsoft Store game \"{}\".", game.title);
     }
-}*/
+}
+
+pub fn set_game_alias() -> String {
+    let mut alias = "".to_string();
+    if settings::get_alias_state() {
+        let mut input = String::new();
+        print!("Do you want to assign an alias [Y\\N]? ");
+        let _ = io::stdout().flush();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to permission to assign alias.");
+        if input.trim() == "Yes" || input.trim() == "Y" || input.trim() == "YES"{
+            print!("Alias name: ");
+            let _ = io::stdout().flush();
+            let mut alias_name = String::new();
+            io::stdin()
+                .read_line(&mut alias_name)
+                .expect("Failed to read alias.");
+            alias = alias_name.trim().to_string();
+        }
+    }
+    alias
+}
 
 pub fn update_alias(title: &str, new_alias: &str){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("update_price Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none() {
         let i = idx.unwrap();
@@ -165,11 +164,7 @@ pub fn update_alias(title: &str, new_alias: &str){
 }
 
 pub fn update_price(title: &str, price: f64) {
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none() {
         let i = idx.unwrap();
@@ -192,22 +187,21 @@ pub fn update_price(title: &str, price: f64) {
 }
 
 pub fn update_id(title: &str, store_type: &str, id: usize){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     //println!("{:?}", idx);
     if !idx.is_none() {
         let mut updated_id : bool = false;
         let i = idx.unwrap();
+        let mut store_name = String::new();
         match store_type{
             settings::STEAM_STORE_ID => {
+                store_name = settings::get_proper_store_name(settings::STEAM_STORE_ID).unwrap();
                 thresholds[i].steam_id = id;
                 updated_id = true;
             },
             settings::GOG_STORE_ID => {
+                store_name = settings::get_proper_store_name(settings::GOG_STORE_ID).unwrap();
                 thresholds[i].gog_id = id;
                 updated_id = true;
             },
@@ -217,54 +211,37 @@ pub fn update_id(title: &str, store_type: &str, id: usize){
             let update_err = format!("Could not convert the {} id update to a string object.", store_type);
             let data_str = serde_json::to_string(&thresholds).expect(&update_err);
             json::write_to_file(get_path(), data_str);
-            let mut store_name = "";
-            match store_type {
-                settings::STEAM_STORE_ID => store_name = "Steam",
-                settings::GOG_STORE_ID => store_name = "GOG",
-                _ => (),
-            }
             println!("Updated {} ID for \"{}\"", store_name, title);
         }
     }
 }
 
 pub fn update_id_str(title: &str, store_type: &str, id: &str){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => eprintln!("Error: {}", e)
-    };
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none() {
         let mut updated_id : bool = false;
         let i = idx.unwrap();
+        let mut store_name = String::new();
         match store_type {
-            /*settings::HUMBLE_BUNDLE_STORE_ID => {
-                thresholds[i].humble_bundle_id = id.to_string();
+            settings::MICROSOFT_STORE_ID => {
+                store_name = settings::get_proper_store_name(settings::MICROSOFT_STORE_ID).unwrap();
+                thresholds[i].microsoft_store_id = id.to_string();
                 updated_id = true;
-            },*/
+            }
             _ => eprintln!("Unknown store type: {}", store_type),
         }
         if updated_id {
             let update_err = format!("Could not convert the {} id update to a string object.", store_type);
             let data_str = serde_json::to_string(&thresholds).expect(&update_err);
             json::write_to_file(get_path(), data_str);
-            let mut store_name = "";
-            /*match store_type {
-                settings::HUMBLE_BUNDLE_STORE_ID => store_name = "Humble Bundle",
-                _ => (),
-            }*/
             println!("Updated {} ID for \"{}\"", store_name, title);
         }  
     }
 }
 
 pub fn remove(title: &str){
-    let mut thresholds : Vec<GameThreshold> = Vec::new();
-    match load_data(){
-        Ok(data) => thresholds = data,
-        Err(e) => println!("Error: {}", e)
-    }
+    let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none(){
         thresholds.remove(idx.unwrap());
