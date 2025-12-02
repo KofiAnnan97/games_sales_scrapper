@@ -7,7 +7,10 @@
   - [X] Add bulk insert option for game thresholds
   - [X] Change logic to only show "Update ID" if the id was actually updated not just called
   - [X] Set up Microsoft Store Storefront
+  - [X] Show the game MSRP for Microsoft Store and GOG during add phase
+  - [X] Add functional to check and display desired sales without sending email
 - Incomplete
+  - [ ] Microsoft Store - Update get price call to only retrieve desired game (instead of reusing search)
   - [ ] Add tests for the following:
     - [ ] API calls (search for game and check game price is all supported storefronts)
     - [ ] Creating and manipulating price thresholds
@@ -15,6 +18,5 @@
 ### Backlog
 - Retrieve pricing data from Steam bundles 
 - Retrieve pricing data from game editions on GOG
-- Show the game MSRP for microsoft store during add phase
 - Set up Humble Bundle Storefront
 - Fix alias not apply to multiple threshold entries (same product different name/edition)

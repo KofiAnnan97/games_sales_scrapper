@@ -1,7 +1,6 @@
 # Game Sales Scrapper
-The purpose of this script is to scrape the game price data from PC storefronts to determine whether a game has reached 
-a desired, user-defined price. If any listed games fall below the price threshold an email will be sent containing all 
-applicable games.
+A script that checks multiple storefront to determine if a game has reached a user-defined price. Automation can be set 
+up to send an email if any game is at or falls below their respective price threshold.
 
 ### Tested Environments
 | Operating System | Tested              |
@@ -83,6 +82,10 @@ Use the`--help` flag in command line to get more information on the supported co
 - `update-cache` := update the locally stored cache of steam games (title and app ids).
     ```commandline
     game_sales_scrapper --update-cache
+    ```
+- `check-prices` := print out any games that are on sale that meet user respective price threshold.
+    ```commandline
+    game_sales_scrapper --check-prices
     ```
 - `send-email` := sends an email (using SMTP) containing a list of games that are below user defined price threshold for each game. No email is sent if no game has reached their price threshold.
     ```commandline 

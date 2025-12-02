@@ -15,7 +15,7 @@ use game_sales_scrapper::structs::microsoft_store_response::GameInfo as MSGameIn
 fn get_recipient() -> String {
     dotenv().ok();
     let recipient = std::env::var("RECIPIENT_EMAIL").expect("RECIPIENT_EMAIL must be set");
-    return recipient;
+    recipient
 }
 
 fn storefront_check() -> Vec<String> {
@@ -26,7 +26,21 @@ fn storefront_check() -> Vec<String> {
     selected_stores
 }
 
-async fn check_prices() -> String {
+fn get_simple_prices_str(store_name: &str, sales: Vec<SaleInfo>) -> String{
+    let mut prices_str = String::new();
+    for game in sales.iter(){
+        prices_str.push_str(&format!("\n\t- {} : {} -> {} ({}% off)",
+                                   game.title, game.original_price, game.current_price,
+                                   game.discount_percentage));
+    }
+    if !prices_str.is_empty() {
+        let header_str = format!("\n{} game(s) that met your desired price:", store_name);
+        prices_str = header_str + &prices_str;
+    }
+    prices_str
+}
+
+async fn check_prices(use_html: bool) -> String {
     let thresholds = thresholds::load_data().unwrap_or_else(|_e|Vec::new());
     let mut steam_sales: Vec<SaleInfo> = Vec::new();
     let mut gog_sales: Vec<SaleInfo> = Vec::new();
@@ -86,15 +100,18 @@ async fn check_prices() -> String {
     }
     if !steam_sales.is_empty(){
         let store_name = settings::get_proper_store_name(settings::STEAM_STORE_ID).unwrap();
-        output.push_str(&email::create_storefront_table_html(&store_name, steam_sales));
+        if use_html { output.push_str(&email::create_storefront_table_html(&store_name, steam_sales)); }
+        else { output.push_str(&get_simple_prices_str(&store_name, steam_sales)); }
     }
     if !gog_sales.is_empty(){
         let store_name = settings::get_proper_store_name(settings::GOG_STORE_ID).unwrap();
-        output.push_str(&email::create_storefront_table_html(&store_name, gog_sales));
+        if use_html { output.push_str(&email::create_storefront_table_html(&store_name, gog_sales)); }
+        else { output.push_str(&get_simple_prices_str(&store_name, gog_sales)); }
     }
     if !microsoft_store_sales.is_empty(){
         let store_name = settings::get_proper_store_name(settings::MICROSOFT_STORE_ID).unwrap();
-        output.push_str(&email::create_storefront_table_html(&store_name, microsoft_store_sales));
+        if use_html { output.push_str(&email::create_storefront_table_html(&store_name, microsoft_store_sales)); }
+        else{ output.push_str(&get_simple_prices_str(&store_name, microsoft_store_sales)); }
     }
     return output;
 }
@@ -125,7 +142,11 @@ async fn gog_insert_sequence(alias: &str, title: &str, price: f64, client: &reqw
     if !search_list.is_empty() {
         println!("GOG search results:");
         for (i, game) in search_list.iter().enumerate(){
-            println!("  [{}] {}", i, game.title);
+            let price = match &game.price{
+                Some(po) => po.base_money.amount.clone(),
+                None => String::from("0"),
+            };
+            println!("  [{}] {} - ${}", i, game.title, price);
         }
         println!("  [q] SKIP");
         let mut input = String::new();
@@ -167,7 +188,7 @@ async fn microsoft_store_insert_sequence(alias: &str, title: &str, price: f64, c
     if !search_list.is_empty() {
         println!("Microsoft Store search results:");
         for(i, game) in search_list.iter().enumerate(){
-            println!("  [{}] {}", i, game.title);
+            println!("  [{}] {} - ${}", i, game.title, game.price_info.msrp.unwrap_or_default());
         }
         println!("  [q] SKIP");
         let mut input = String::new();
@@ -273,7 +294,7 @@ async fn main(){
                 .long("list-selected-stores")
                 .exclusive(true)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all([ "thresholds", "cache", "email"])
+                .conflicts_with_all([ "thresholds", "cache", "email", "check-prices"])
                 .required(false)
                 .help("Display the selected storefronts")
         )
@@ -283,7 +304,7 @@ async fn main(){
                 .long("list-thresholds")
                 .exclusive(true)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all(["cache", "email", "selected-stores"])
+                .conflicts_with_all(["cache", "email", "selected-stores", "check-prices"])
                 .required(false)
                 .help("List all game price thresholds")
         )
@@ -293,9 +314,19 @@ async fn main(){
                 .long("update-cache")
                 .exclusive(true)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all(["thresholds", "email", "selected-stores"])
+                .conflicts_with_all(["thresholds", "email", "selected-stores", "check-prices"])
                 .required(false)
                 .help("Updated cached list of games")
+        )
+        .arg(
+            Arg::new("check-prices")
+                .short('p')
+                .long("check-prices")
+                .exclusive(true)
+                .action(ArgAction::SetTrue)
+                .conflicts_with_all(["thresholds", "cache", "selected-stores", "email"])
+                .required(false)
+                .help("Print out which games are on sale")
         )
         .arg(
             Arg::new("email")
@@ -303,7 +334,7 @@ async fn main(){
                 .long("send-email")
                 .exclusive(true)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all(["thresholds", "cache", "selected-stores"])
+                .conflicts_with_all(["thresholds", "cache", "selected-stores", "check-prices"])
                 .required(false)
                 .help("Send email if game(s) are below price threshold")
         )
@@ -395,14 +426,20 @@ async fn main(){
                 println!("Caching started");
                 steam::update_cached_games().await;
             }
+            else if cmd.get_flag("check-prices") {
+                let use_html = false;
+                let prices_str = check_prices(use_html).await;
+                println!("CHECK PRICES\n------------\n{}", prices_str);
+            }
             else if cmd.get_flag("email"){
-                let email_str = check_prices().await;
+                let use_html = true;
+                let email_str = check_prices(use_html).await;
                 println!("Email Contents:\n{}\n", email_str);
                 if email_str.is_empty(){ println!("No game(s) on sale at price thresholds"); }
                 else {
                     println!("Sending email...");
                     let to_address = &get_recipient();
-                    //email::send_with_html(to_address, "Check Out Which Games Are On Sale", &email_str);
+                    email::send_with_html(to_address, "Check Out Which Games Are On Sale", &email_str);
                 }
             }
             else { println!("No/incorrect command given. Use \'--help\' for assistance."); }

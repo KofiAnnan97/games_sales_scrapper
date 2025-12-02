@@ -129,7 +129,7 @@ pub async fn get_price_details_v2(title: &str, http_client: &reqwest::Client) ->
                     title: data.title,
                     original_price: po.base_money.amount,
                     current_price: po.final_money.amount, 
-                    discount_percentage: po.final_money.discount,
+                    discount_percentage: po.final_money.discount[0..po.final_money.discount.len()-3].to_string(),
                     icon_link: data.c_horizontal,
                     store_page_link: data.store_link,
                 }).ok();
