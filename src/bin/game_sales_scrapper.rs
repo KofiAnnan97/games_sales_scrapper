@@ -10,7 +10,7 @@ use game_sales_scrapper::alerting::email;
 use game_sales_scrapper::file_ops::{csv, settings, thresholds};
 use game_sales_scrapper::structs::data::{SaleInfo, SimpleGameThreshold};
 use game_sales_scrapper::structs::gog_response::GameInfo as GOGGameInfo;
-use game_sales_scrapper::structs::microsoft_store_response::GameInfo as MSGameInfo;
+use game_sales_scrapper::structs::microsoft_store_response::ProductInfo;
 
 fn get_recipient() -> String {
     dotenv().ok();
@@ -87,7 +87,7 @@ async fn check_prices(use_html: bool) -> String {
             }
         }
         if !elem.microsoft_store_id.is_empty() {
-            match microsoft_store::get_price(&elem.title, &elem.microsoft_store_id, &http_client).await {
+            match microsoft_store::get_price_details(&elem.microsoft_store_id, &http_client).await {
                 Some(info) => {
                     let current_price = info.current_price.parse::<f64>().unwrap();
                     if elem.desired_price >= current_price {
@@ -113,7 +113,7 @@ async fn check_prices(use_html: bool) -> String {
         if use_html { output.push_str(&email::create_storefront_table_html(&store_name, microsoft_store_sales)); }
         else{ output.push_str(&get_simple_prices_str(&store_name, microsoft_store_sales)); }
     }
-    return output;
+    output
 }
 
 async fn steam_insert_sequence(alias: &str, title: &str, price: f64, client: &reqwest::Client) {
@@ -180,7 +180,7 @@ async fn gog_insert_sequence(alias: &str, title: &str, price: f64, client: &reqw
 }
 
 async fn microsoft_store_insert_sequence(alias: &str, title: &str, price: f64, client: &reqwest::Client){
-    let mut search_list : Vec<MSGameInfo> = Vec::new();
+    let mut search_list : Vec<ProductInfo> = Vec::new();
     match microsoft_store::search_game_by_title(title, &client).await {
         Ok(data) => search_list = data,
         Err(e) => println!("Search Microsoft Store Error: {}", e)
@@ -429,7 +429,7 @@ async fn main(){
             else if cmd.get_flag("check-prices") {
                 let use_html = false;
                 let prices_str = check_prices(use_html).await;
-                println!("CHECK PRICES\n------------\n{}", prices_str);
+                println!("------------\nCHECK PRICES\n------------\n{}", prices_str);
             }
             else if cmd.get_flag("email"){
                 let use_html = true;
@@ -439,7 +439,7 @@ async fn main(){
                 else {
                     println!("Sending email...");
                     let to_address = &get_recipient();
-                    email::send_with_html(to_address, "Check Out Which Games Are On Sale", &email_str);
+                    email::send_html_msg(to_address, "Check Out Which Games Are On Sale", &email_str);
                 }
             }
             else { println!("No/incorrect command given. Use \'--help\' for assistance."); }

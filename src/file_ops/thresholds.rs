@@ -6,7 +6,7 @@ use crate::file_ops::{json, settings};
 use crate::stores::{steam, gog, microsoft_store};
 use crate::structs::steam_response::Game;
 use crate::structs::gog_response::GameInfo as GOGGameInfo;
-use crate::structs::microsoft_store_response::GameInfo as MSGameInfo;
+use crate::structs::microsoft_store_response::ProductInfo;
 use crate::structs::data::GameThreshold;
 
 static THRESHOLD_FILENAME : &str = "thresholds.json";
@@ -98,7 +98,7 @@ pub fn add_gog_game(new_alias: String, game: &GOGGameInfo, price: f64){
     //else { println!("Duplicate title: \"{}\".", game.title); }
 }
 
-pub fn add_microsoft_store_game(new_alias: String, game: &MSGameInfo, price: f64){
+pub fn add_microsoft_store_game(new_alias: String, game: &ProductInfo, price: f64){
     let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     let mut unique : bool = true;
     for elem in thresholds.iter(){

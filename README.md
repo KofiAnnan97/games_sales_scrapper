@@ -16,7 +16,7 @@ Roadmap: [[link](./Roadmap.md)]
 - **Microsoft Store (PC)**
 
 ## Quick Start
-1. Setup SMTP server/service (TLS required/optional)
+1. Setup SMTP server/service (TLS required)
 2. Nagivate to project folder and run `cargo build --release`
 3. In the project folder, create `.env` with the following:
     ```
