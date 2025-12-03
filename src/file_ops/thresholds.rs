@@ -3,7 +3,7 @@ use serde_json::Result;
 use std::fs::read_to_string;
 
 use crate::file_ops::{json, settings};
-use crate::stores::{steam, gog, microsoft_store};
+use crate::stores::{steam}; //, gog, microsoft_store};
 use crate::structs::steam_response::Game;
 use crate::structs::gog_response::GameInfo as GOGGameInfo;
 use crate::structs::microsoft_store_response::ProductInfo;
