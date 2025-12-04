@@ -19,8 +19,9 @@ static DETAILS_ENDPOINT : &str = "/api/appdetails";
 // Secrets
 fn get_api_key() -> String {
     dotenv().ok();
-    let steam_api_token = std::env::var("STEAM_API_KEY").expect("STEAM_API_KEY must be set");
-    return steam_api_token;
+    // Optional field
+    let steam_api_token = std::env::var("STEAM_API_KEY").unwrap_or_else(|_| String::new());
+    steam_api_token
 }
 
 // Caching Functions
