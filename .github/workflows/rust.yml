@@ -10,14 +10,12 @@ on:
       - "dev"
 env:
   CARGO_TERM_COLOR: always
-  PROJECT_PATH: "${{GITHUB_WORKSPACE}}/games_sales_scrapper"
+  PROJECT_PATH: "${{GITHUB_WORKSPACE}}"
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: List environment variables
-      run: printenv
     - name: Build
       run: cargo build --release --verbose
     - name: Run tests
