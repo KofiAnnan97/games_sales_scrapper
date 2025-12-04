@@ -10,8 +10,8 @@ on:
       - "dev"
 env:
   CARGO_TERM_COLOR: always
-  STEAM_API_KEY: "${{ keys.STEAM_API_KEY }}"
-  PROJECT_PATH: "${{ github.workspace }}"
+  STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+  PROJECT_PATH: "${{ github.workspace }}
 jobs:
   build:
     runs-on: ubuntu-latest
