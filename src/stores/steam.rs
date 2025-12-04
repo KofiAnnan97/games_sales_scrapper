@@ -221,7 +221,7 @@ pub async fn check_game(name: &str) -> Option<Game> {
 }
 
 // Search Functions
-async fn search_by_keyphrase(keyphrase: &str) -> Result<Vec<String>>{
+pub async fn search_by_keyphrase(keyphrase: &str) -> Result<Vec<String>>{
     let mut games_list : Vec<Game> = Vec::new();
     match load_cached_games().await {
         Ok(data) => games_list = data,
