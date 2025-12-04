@@ -19,9 +19,9 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build
       run: cargo build --release --verbose
-    - name: Working Directory
-      run: echo "Current Working Directory:" & pwd && ls .
     - name: Create env file
-      run: bash ./setup/create_pipeline_env_file.sh
+      run: bash ./setup/create_pipeline_env_file.sh && ls ./setup
+    - name: Set up config for storefronts
+      run: cargo run -- config -a
     - name: Run tests
       run: cargo test --release --verbose -- --test-threads=1
