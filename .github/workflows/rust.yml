@@ -12,6 +12,7 @@ env:
   CARGO_TERM_COLOR: always
   STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
   PROJECT_PATH: ${{ github.workspace }}
+  RUST_BACKTRACE: 1
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,10 +21,10 @@ jobs:
     - name: Build
       run: cargo build --release --verbose
     - name: Create env file
-      run: bash ./setup/create_pipeline_env_file.sh && ls ./setup
+      run: bash ./setup/create_pipeline_env_file.sh
     - name: Set up config for storefronts
-      run: cargo run --release -- config -a
+      run: ./target/release/game_sales_scrapper config -a
     - name: Cache Steam Games
-      run: cargo run --release -- --update-cache
+      run: ./target/release/game_sales_scrapper --update-cache
     - name: Run tests
       run: cargo test --release -- --test-threads=1

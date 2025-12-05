@@ -67,7 +67,7 @@ pub async fn update_cached_games(){
     match get_all_games(&client).await {
         Ok(success) => {
             println!("Updating cached game titles (this will take a while)...");
-            let body : Value = serde_json::from_str(&success).expect("Could convert to JSON");
+            let body : Value = serde_json::from_str(&success).expect("Could convert Steam app list to JSON");
             let app_list = serde_json::to_string(&body["response"]["apps"]).unwrap();
             let data = serde_json::from_str::<Vec<App>>(&app_list);
             temp = data.unwrap();
@@ -107,7 +107,7 @@ async fn get_all_games(client: &reqwest::Client) -> Result<String> {
         ("key", steam_api_key.as_str()),
         ("max_results", "40000"),
         ("last_appid", &last_app_id),
-        ("format", "json")
+        //("format", "json")
     ];
     let url = format!("{}{}/", API_BASE_URL, APP_LIST_ENDPOINT);
     let resp = client.get(url)
