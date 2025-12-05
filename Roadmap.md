@@ -10,9 +10,10 @@
   - [X] Show the game MSRP for Microsoft Store and GOG during add phase
   - [X] Add functional to check and display desired sales without sending email
   - [X] Microsoft Store - Update get price call to only retrieve desired game (instead of reusing search)
+  - [ ] Add tests for the following:
+    - [X] API calls (search for game and check game price is all supported storefronts)
 - Incomplete
   - [ ] Add tests for the following:
-    - [ ] API calls (search for game and check game price is all supported storefronts)
     - [ ] Creating and manipulating price thresholds
 
 ### Backlog

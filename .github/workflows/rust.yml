@@ -1,5 +1,4 @@
 name: Rust
-
 on:
   push:
     branches: 
@@ -9,18 +8,37 @@ on:
     branches: 
       - "master"
       - "dev"
-
 env:
   CARGO_TERM_COLOR: always
-
+  STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+  PROJECT_PATH: ${{ github.workspace }}
+  RUST_BACKTRACE: 1
 jobs:
-  build:
-
+  linux:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Build
       run: cargo build --release --verbose
-    #- name: Run tests
-    #  run: cargo test --verbose
+    - name: Create env file
+      run: bash ./setup/pipeline/create_env_file.sh
+    - name: Set up config for storefronts
+      run: ./target/release/game_sales_scrapper config -a
+    - name: Cache Steam games
+      run: ./target/release/game_sales_scrapper --update-cache
+    - name: Run tests
+      run: cargo test --release -- --test-threads=1
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cargo build --release --verbose
+      - name: Create env file
+        run: .\setup\pipeline\create_env_file.ps1
+      - name: Set up config for storefronts
+        run: .\target\release\game_sales_scrapper.exe config -a
+      - name: Cache Steam games
+        run: .\target\release\game_sales_scrapper.exe --update-cache
+      - name: Run tests
+        run: cargo test --release -- --test-threads=1
