@@ -1,5 +1,5 @@
-static GAME_TITLE: &str = "SILENT HILL f";
-static GAME_ID: usize = 2947440;
+static GAME_TITLE: &str = "Half-Life 2";
+static GAME_ID: usize = 220;
 
 #[cfg(test)]
 mod gog_api_tests {

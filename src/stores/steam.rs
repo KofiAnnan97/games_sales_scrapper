@@ -39,8 +39,21 @@ fn get_cache_path() -> String{
 pub async fn load_cached_games() -> Result<Vec<App>> {
     let filepath = get_cache_path();
     let data = read_to_string(filepath).unwrap();
-    let temp = serde_json::from_str::<Vec<App>>(&data);
-    return temp;
+    let cached_games = serde_json::from_str::<Vec<App>>(&data);
+    cached_games
+}
+
+pub async fn get_last_appid() -> String {
+    match load_cached_games().await{
+        Ok(games) => {
+            if games.len() > 0 {
+                let app_id_str = format!("{}", games.last().unwrap().app_id);
+                String::from(app_id_str)
+            }
+            else { String::from("0") }
+        },
+        Err(_) => String::from("0"),
+    }
 }
 
 pub async fn update_cached_games(){
@@ -88,10 +101,13 @@ pub async fn update_cached_games(){
 // API Functions 
 async fn get_all_games(client: &reqwest::Client) -> Result<String> {
     let steam_api_key = get_api_key();
+    let last_app_id = get_last_appid().await;
+    //println!("Last appid: {}", last_app_id);
     let query_string = [
         ("key", steam_api_key.as_str()),
-        ("max_results", "50000"),
-        ("format", "json"),
+        ("max_results", "40000"),
+        ("last_appid", &last_app_id),
+        ("format", "json")
     ];
     let url = format!("{}{}/", API_BASE_URL, APP_LIST_ENDPOINT);
     let resp = client.get(url)
