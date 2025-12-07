@@ -3,8 +3,8 @@ use serde_json::Result;
 use std::fs::read_to_string;
 
 use crate::file_ops::{json, settings};
-use crate::stores::{steam, gog, microsoft_store};
-use crate::structs::steam_response::Game;
+use crate::stores::{steam}; //, gog, microsoft_store};
+use crate::structs::steam_response::App;
 use crate::structs::gog_response::GameInfo as GOGGameInfo;
 use crate::structs::microsoft_store_response::ProductInfo;
 use crate::structs::data::GameThreshold;
@@ -15,21 +15,21 @@ pub fn get_path() -> String {
     let mut thresh_path = json::get_data_path();
     thresh_path.push_str("/");
     thresh_path.push_str(THRESHOLD_FILENAME);
-    return json::get_path(&thresh_path);
+    json::get_path(&thresh_path)
 }
 
 pub fn load_data() -> Result<Vec<GameThreshold>> {
     let filepath = get_path();
     let data = read_to_string(filepath).unwrap();
-    let temp = serde_json::from_str::<Vec<GameThreshold>>(&data);
-    return temp;
+    let path_str = serde_json::from_str::<Vec<GameThreshold>>(&data);
+    path_str
 }
 
 fn is_threshold(title: &str, game_thresh: &GameThreshold) -> bool {
     title == game_thresh.title || title == game_thresh.alias
 }
 
-pub async fn add_steam_game(new_alias: String, app: Game, price: f64, client: &reqwest::Client){
+pub async fn add_steam_game(new_alias: String, app: App, price: f64, client: &reqwest::Client){
     let mut thresholds = load_data().unwrap_or_else(|_e|Vec::new());
     match steam::get_price(app.app_id, &client).await {
         Ok(po) => {

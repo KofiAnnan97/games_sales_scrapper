@@ -85,6 +85,41 @@ pub struct GameInfo {
     user_pref_lang: UserPreferredLanguage,
 }
 
+pub struct GameInfoBuilder {
+    pub data: GameInfo,
+}
+
+impl GameInfoBuilder{
+    pub fn new(id_str: String, game_title: String,
+               price_info: Price, icon_link: String,
+               store_page_link: String) -> GameInfo {
+        GameInfo {
+            id: id_str,
+            title: game_title,
+            price: Option::from(price_info),
+            c_horizontal: icon_link,
+            store_link: store_page_link,
+            c_vertical: "".to_string(),
+            developers: vec![],
+            editions: vec![],
+            features: vec![],
+            genres: vec![],
+            os: vec![],
+            product_state: "".to_string(),
+            product_type: "".to_string(),
+            publishers: vec![],
+            ratings: vec![],
+            release_date: "".to_string(),
+            reviews_rating: 0,
+            screenshots: vec![],
+            slug: "".to_string(),
+            store_release_date: "".to_string(),
+            tags: vec![],
+            user_pref_lang: Default::default(),
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct UserPreferredLanguage{
     pub code: String,

@@ -22,6 +22,14 @@ pub mod structs {
     pub mod microsoft_store_response;
 }
 
+pub mod tests {
+    pub mod settings_unit_tests;
+    pub mod threshold_unit_tests;
+    pub mod api_steam;
+    pub mod api_gog;
+    pub mod api_microsoft_store;
+}
+
 pub use alerting::email;
 pub use stores::{steam, gog, microsoft_store};
 pub use file_ops::{csv, json, settings, thresholds};
