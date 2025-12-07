@@ -7,10 +7,10 @@ const TEST_VAR_NAME : &str = "TEST_PATH";
 const PROJECT_VAR_NAME : &str = "PROJECT_PATH";
 
 #[cfg(test)]
-const PATH_ENV_VAR: &str = TEST_VAR_NAME;
+const PATH_ENV_VAR : &str = TEST_VAR_NAME;
 
 #[cfg(not(test))]
-const PATH_ENV_VAR: &str = PROJECT_VAR_NAME;
+const PATH_ENV_VAR : &str = PROJECT_VAR_NAME;
 
 pub fn get_path(path_str: &str) -> String{
     let path = Path::new(path_str);
@@ -28,7 +28,7 @@ pub fn write_to_file(path: String, data: String){
     write(path, data).expect("Data could not be saved.\n");
 }
 
-fn delete_file(file_path: String){
+pub fn delete_file(file_path: String){
     match fs::remove_file(get_path(&file_path)){
         Ok(_) => println!("Successfully deleted {}", file_path),
         Err(e) => {eprintln!("{}",e)}

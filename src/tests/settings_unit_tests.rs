@@ -69,9 +69,6 @@ fn get_selected_stores() {
     assert_eq!(false, is_ms_store_selected, "{} should not be selected", MICROSOFT_STORE_ID);
 }
 
-/*[test]
-fn set_game_alias_sequence() {} */
-
 #[test]
 fn get_alias_state() {
     default_settings();

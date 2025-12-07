@@ -15,14 +15,14 @@ pub fn get_path() -> String {
     let mut thresh_path = json::get_data_path();
     thresh_path.push_str("/");
     thresh_path.push_str(THRESHOLD_FILENAME);
-    return json::get_path(&thresh_path);
+    json::get_path(&thresh_path)
 }
 
 pub fn load_data() -> Result<Vec<GameThreshold>> {
     let filepath = get_path();
     let data = read_to_string(filepath).unwrap();
-    let temp = serde_json::from_str::<Vec<GameThreshold>>(&data);
-    return temp;
+    let path_str = serde_json::from_str::<Vec<GameThreshold>>(&data);
+    path_str
 }
 
 fn is_threshold(title: &str, game_thresh: &GameThreshold) -> bool {
