@@ -91,7 +91,7 @@ pub async fn update_cached_games(){
             });
         }
     }
-    let data_str = serde_json::to_string(&games_list).unwrap();
+    let data_str = serde_json::to_string_pretty(&games_list).unwrap();
     json::write_to_file(get_cache_path(), data_str);
     println!("Cache update complete")
 }

@@ -12,9 +12,10 @@
   - [X] Microsoft Store - Update get price call to only retrieve desired game (instead of reusing search)
   - [ ] Add tests for the following:
     - [X] API calls (search for game and check game price is all supported storefronts)
+    - [X] Unit testing for thresholds and settings operations
 - Incomplete
   - [ ] Add tests for the following:
-    - [ ] Creating and manipulating price thresholds
+    - [ ] Functional testing (missing `add` and `bulk-insert` cmds)
 
 ### Backlog
 - Retrieve pricing data from Steam bundles 

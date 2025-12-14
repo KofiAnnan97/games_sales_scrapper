@@ -53,7 +53,7 @@ pub async fn add_steam_game(new_alias: String, app: App, price: f64, client: &re
                     currency: po.currency[1..po.currency.len()-1].to_string(),
                     desired_price: price
                 });
-                let data_str = serde_json::to_string(&thresholds).unwrap();
+                let data_str = serde_json::to_string_pretty(&thresholds).unwrap();
                 json::write_to_file(get_path(), data_str);
                 println!("Successfully added Steam game: \"{}\".", app.name);
             }
@@ -91,7 +91,7 @@ pub fn add_gog_game(new_alias: String, game: &GOGGameInfo, price: f64){
             currency: currency_code,
             desired_price: price
         });
-        let data_str = serde_json::to_string(&thresholds).unwrap();
+        let data_str = serde_json::to_string_pretty(&thresholds).unwrap();
         json::write_to_file(get_path(), data_str);
         println!("Successfully added GOG game \"{}\".", game.title);
     }
@@ -121,7 +121,7 @@ pub fn add_microsoft_store_game(new_alias: String, game: &ProductInfo, price: f6
             currency: String::new(),
             desired_price: price
         });
-        let data_str = serde_json::to_string(&thresholds).unwrap();
+        let data_str = serde_json::to_string_pretty(&thresholds).unwrap();
         json::write_to_file(get_path(), data_str);
         println!("Successfully added Microsoft Store game \"{}\".", game.title);
     }
@@ -155,7 +155,7 @@ pub fn update_alias(title: &str, new_alias: &str){
     if !idx.is_none() {
         let i = idx.unwrap();
         thresholds[i].alias = new_alias.to_string();
-        let data_str = serde_json::to_string(&thresholds).expect("Could not convert GOG id update to string.");
+        let data_str = serde_json::to_string_pretty(&thresholds).expect("Could not convert GOG id update to string.");
         json::write_to_file(get_path(), data_str);
     }
     else {
@@ -171,7 +171,7 @@ pub fn update_price(title: &str, price: f64) {
         if price != thresholds[i].desired_price{
             let old_threshold = thresholds[i].desired_price.clone();
             thresholds[i].desired_price = price;
-            let data_str = serde_json::to_string(&thresholds).expect("Could not price update to string.");
+            let data_str = serde_json::to_string_pretty(&thresholds).expect("Could not price update to string.");
             json::write_to_file(get_path(), data_str);
             println!("\"{}\": updated price threshold from {} to {}", thresholds[i].title,
                                                        old_threshold,
@@ -209,7 +209,7 @@ pub fn update_id(title: &str, store_type: &str, id: usize){
         }
         if updated_id {
             let update_err = format!("Could not convert the {} id update to a string object.", store_type);
-            let data_str = serde_json::to_string(&thresholds).expect(&update_err);
+            let data_str = serde_json::to_string_pretty(&thresholds).expect(&update_err);
             json::write_to_file(get_path(), data_str);
             println!("Updated {} ID for \"{}\"", store_name, title);
         }
@@ -233,7 +233,7 @@ pub fn update_id_str(title: &str, store_type: &str, id: &str){
         }
         if updated_id {
             let update_err = format!("Could not convert the {} id update to a string object.", store_type);
-            let data_str = serde_json::to_string(&thresholds).expect(&update_err);
+            let data_str = serde_json::to_string_pretty(&thresholds).expect(&update_err);
             json::write_to_file(get_path(), data_str);
             println!("Updated {} ID for \"{}\"", store_name, title);
         }  
@@ -245,7 +245,7 @@ pub fn remove(title: &str){
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     if !idx.is_none(){
         thresholds.remove(idx.unwrap());
-        let data_str = serde_json::to_string(&thresholds).unwrap();
+        let data_str = serde_json::to_string_pretty(&thresholds).unwrap();
         json::write_to_file(get_path(), data_str);
         println!("Successfully removed \"{}\".", title);
     }

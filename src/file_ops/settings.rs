@@ -55,7 +55,7 @@ fn get_path() -> String{
         Ok(md) => {
             if md.len() == 0 {
                 let settings = json!({"selected_stores": [], "alias_enabled": 1});
-                let settings_str = serde_json::to_string(&settings);
+                let settings_str = serde_json::to_string_pretty(&settings);
                 json::write_to_file(config_path.to_string(), settings_str.expect("Initial settings could not be created."));
             }
         },
@@ -105,22 +105,12 @@ pub fn update_selected_stores(selected: Vec<String>) {
         Ok(data) => {
             let mut settings = data;
             let selected_stores = settings.get_mut("selected_stores").unwrap();
-            let selected_stores_str = serde_json::to_string(selected_stores).unwrap();
             let mut unique_stores : Vec<String> = Vec::new();
-            match serde_json::from_str::<Vec<String>>(&selected_stores_str) {
-                Ok(stores) => {
-                    unique_stores = stores;
-                    if selected.is_empty() { unique_stores = selected.clone(); }
-                    for store in selected {
-                        if !unique_stores.contains(&store) {
-                            unique_stores.push(store);
-                        }
-                    }
-                }
-                Err(e) => assert!(false, "Error: {}", e),
+            for store in selected {
+                if !unique_stores.contains(&store) { unique_stores.push(store); }
             }
             *selected_stores = json!(unique_stores);
-            let settings_str = serde_json::to_string(&settings);
+            let settings_str = serde_json::to_string_pretty(&settings);
             json::write_to_file(get_path(), settings_str.expect("Cannot update store search settings"));
         },
         Err(e) => eprintln!("Error: {}", e)
@@ -133,7 +123,7 @@ pub fn update_alias_state(is_enabled: i32){
             let mut settings = data;
             let enabled_status = if is_enabled == ALIAS_ENABLED || is_enabled == ALIAS_DISABLED { is_enabled } else { ALIAS_DISABLED };
             *settings.get_mut("alias_enabled").unwrap() = json!(enabled_status);
-            let settings_str = serde_json::to_string(&settings);
+            let settings_str = serde_json::to_string_pretty(&settings);
             json::write_to_file(get_path(), settings_str.expect("Cannot set state of aliases"));
         },
         Err(e) => eprintln!("Error: {}", e)

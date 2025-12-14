@@ -1,16 +1,26 @@
 use dotenv::dotenv;
-use std::{fs};
+use std::sync::{Mutex};
+use cfg_if::cfg_if;
+use lazy_static::lazy_static;
+use std::fs;
 use std::fs::{File, write};
 use std::path::Path;
 
-const TEST_VAR_NAME : &str = "TEST_PATH";
-const PROJECT_VAR_NAME : &str = "PROJECT_PATH";
+static TEST_VAR_NAME : &str = "TEST_PATH";
+static PROJECT_VAR_NAME : &str = "PROJECT_PATH";
 
-#[cfg(test)]
-const PATH_ENV_VAR : &str = TEST_VAR_NAME;
+lazy_static! {
+    static ref PATH_ENV_VAR : Mutex<String> = {
+        cfg_if! {
+            if #[cfg(not(test))] { Mutex::new(PROJECT_VAR_NAME.to_string()) }
+            else if #[cfg(test)] { Mutex::new(TEST_VAR_NAME.to_string()) }
+        }
+    };
+}
 
-#[cfg(not(test))]
-const PATH_ENV_VAR : &str = PROJECT_VAR_NAME;
+pub fn enable_test_flag() {
+    *PATH_ENV_VAR.lock().unwrap() = String::from(TEST_VAR_NAME);
+}
 
 pub fn get_path(path_str: &str) -> String{
     let path = Path::new(path_str);
@@ -37,11 +47,13 @@ pub fn delete_file(file_path: String){
 
 pub fn get_data_path() -> String {
     dotenv().ok();
-    let mut data_path = std::env::var(PATH_ENV_VAR).unwrap_or_else(|_| String::from("."));
+    let path_env = PATH_ENV_VAR.lock().unwrap().clone();
+    //println!("Env var: {:?}", path_env);
+    let mut data_path = std::env::var(path_env).unwrap_or_else(|_| String::from("."));
     data_path.push_str("/data");
     //println!("Path: {}", data_path);
     if Path::new(&data_path).is_dir() != true {
         let _ = fs::create_dir(&data_path);
     }
-    return data_path;
+    data_path
 }

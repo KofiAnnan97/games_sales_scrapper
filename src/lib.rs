@@ -22,12 +22,14 @@ pub mod structs {
     pub mod microsoft_store_response;
 }
 
+#[cfg(test)]
 pub mod tests {
     pub mod settings_unit_tests;
     pub mod threshold_unit_tests;
     pub mod api_steam;
     pub mod api_gog;
     pub mod api_microsoft_store;
+    pub mod functional_tests;
 }
 
 pub use alerting::email;
