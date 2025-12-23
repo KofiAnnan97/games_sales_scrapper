@@ -24,12 +24,18 @@ pub mod structs {
 
 #[cfg(test)]
 pub mod tests {
-    pub mod settings_unit_tests;
-    pub mod threshold_unit_tests;
-    pub mod api_steam;
-    pub mod api_gog;
-    pub mod api_microsoft_store;
-    pub mod functional_tests;
+    pub mod unit{
+        pub mod settings_ops;
+        pub mod threshold_ops;
+    }
+    pub mod api{
+        pub mod steam_pc;
+        pub mod gog_pc;
+        pub mod microsoft_store_pc;
+    }
+    pub mod functional{
+        pub mod commands;
+    }
 }
 
 pub use alerting::email;

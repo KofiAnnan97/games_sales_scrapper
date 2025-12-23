@@ -55,7 +55,7 @@ pub fn get_data_path() -> String {
     let mut data_path = env::var(path_env).unwrap_or_else(|_| String::from("."));
     let path: PathBuf = [&data_path, "data"].iter().collect();
     data_path = path.display().to_string();
-    println!("Path: {}", data_path);
+    //println!("Path: {}", data_path);
     if Path::new(&data_path).is_dir() != true {
         let _ = fs::create_dir(&data_path);
     }

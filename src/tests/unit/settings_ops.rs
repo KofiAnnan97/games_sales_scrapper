@@ -1,3 +1,4 @@
+#[cfg(test)]
 use std::collections::HashMap;
 use crate::settings::{self, STEAM_STORE_ID, STEAM_STORE_NAME,
                           GOG_STORE_ID, GOG_STORE_NAME,

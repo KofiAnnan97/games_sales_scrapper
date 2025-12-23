@@ -10,15 +10,21 @@
   - [X] Show the game MSRP for Microsoft Store and GOG during add phase
   - [X] Add functional to check and display desired sales without sending email
   - [X] Microsoft Store - Update get price call to only retrieve desired game (instead of reusing search)
-  - [ ] Add tests for the following:
+  - [X] Add tests for the following:
     - [X] API calls (search for game and check game price is all supported storefronts)
     - [X] Unit testing for thresholds and settings operations
-- Incomplete
-  - [ ] Add tests for the following:
-    - [ ] Functional testing (missing `add` and `bulk-insert` cmds)
+    - [X] Functional testing for user commands
+- Incomplete 
+  - [ ] Fix Windows tests for github actions
 
 ### Backlog
-- Retrieve pricing data from Steam bundles 
-- Retrieve pricing data from game editions on GOG
-- Set up Humble Bundle Storefront
-- Fix alias not apply to multiple threshold entries (same product different name/edition)
+- Features
+  - Retrieve pricing data from Steam bundles 
+  - Retrieve pricing data from game editions on GOG
+  - Set up Humble Bundle Storefront
+- Bugs
+  - Fix alias not apply to multiple threshold entries (same product different name/edition)
+  - Fix Steam game cache to check and update when any app info changes
+- Testing
+  - Show status of build and tests done for Windows and Ubuntu on Readme
+  - Add the `add` and `bulk-insert` cmds for functional testing

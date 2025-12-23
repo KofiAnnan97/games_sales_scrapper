@@ -3,12 +3,12 @@ A script that checks multiple storefront to determine if a game has reached a us
 up to send an email if any game is at or falls below their respective price threshold.
 
 ### Tested Environments
-| Operating System | Tested              |
-|------------------|---------------------|
-| Ubuntu 24.04     | :white_check_mark:  |
-| Windows 11       | :white_check_mark:  |
+| Operating System | Testing                                                                                                    |
+|------------------|------------------------------------------------------------------------------------------------------------|
+| Ubuntu 24.04     | ![](https://github.com/KofiAnnan97/game_sales_scrapper/actions/workflows/linux.yml/badge.svg?event=push)   |
+| Windows 11       | ![](https://github.com/KofiAnnan97/game_sales_scrapper/actions/workflows/windows.yml/badge.svg?event=push) |
 
-Roadmap: [[link](./Roadmap.md)]
+#### Roadmap: [[link](./Roadmap.md)]
 
 ### Supported Storefronts
 - **Steam**
@@ -28,6 +28,7 @@ Roadmap: [[link](./Roadmap.md)]
     SMTP_USERNAME={smtp_username}
     SMTP_PWD={stmp_password}
     PROJECT_PATH={/path/to/game_sales_scrapper}
+    TEST_PATH={/path/to/test_directory}
     ```
     - For Windows use `\\` when defining the path.
 

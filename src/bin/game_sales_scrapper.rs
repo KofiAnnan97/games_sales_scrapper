@@ -317,7 +317,6 @@ async fn main(){
             Arg::new("cache")
                 .short('c')
                 .long("update-cache")
-                .exclusive(true)
                 .action(ArgAction::SetTrue)
                 .conflicts_with_all(["thresholds", "email", "selected-stores", "check-prices"])
                 .required(false)

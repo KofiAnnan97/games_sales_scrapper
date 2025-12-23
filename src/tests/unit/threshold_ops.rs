@@ -1,3 +1,4 @@
+#[cfg(test)]
 use serde_json::json;
 use crate::thresholds;
 use crate::json as json_data;
