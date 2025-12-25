@@ -46,6 +46,8 @@ jobs:
       - name: Run tests
         run: cargo test --release -- --test-threads=1
       - name: Check if data exists in test folder [DELETE LATER]
+        if: always()
         run: tree .\src\tests /f
       - name: Check if data exists in root folder [DELETE LATER]
+        if: always()
         run: tree .\data /f

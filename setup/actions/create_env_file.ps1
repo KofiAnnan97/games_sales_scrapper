@@ -1,7 +1,7 @@
 # Read environment variables
 $STEAM_API_KEY = $Env:STEAM_API_KEY
 $PROJECT_PATH = $Env:PROJECT_PATH
-$TEST_PATH = "$Env:PROJECT_PATH\\src\\tests"
+$TEST_PATH = "$Env:PROJECT_PATH\src\tests"
 
 # Create file contents
 $envContent = @"
