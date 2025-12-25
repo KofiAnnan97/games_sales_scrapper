@@ -1,4 +1,4 @@
-name: Windows
+name: Tests
 on:
   schedule:
     - cron: "0 0 1 */4 *"
@@ -16,16 +16,26 @@ env:
   PROJECT_PATH: ${{ github.workspace }}
   RUST_BACKTRACE: 1
 jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create env file
+      run: bash ./setup/actions/create_env_file.sh
+    - name: Set up config for storefronts
+      run: ./target/release/game_sales_scrapper config -a -z
+    - name: Cache Steam games
+      run: ./target/release/game_sales_scrapper --update-cache --test_flag
+    - name: Run tests
+      run: cargo test --release -- --test-threads=1
   windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        run: cargo build --release --verbose
       - name: Create env file
         run: .\setup\actions\create_env_file.ps1
       - name: Set up config for storefronts
-        run: .\target\release\game_sales_scrapper.exe config -a
+        run: .\target\release\game_sales_scrapper.exe config -a -z
       - name: Cache Steam games
         run: .\target\release\game_sales_scrapper.exe --update-cache --test_flag
       - name: Run tests

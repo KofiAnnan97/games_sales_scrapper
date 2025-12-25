@@ -1,4 +1,5 @@
-use dotenv::dotenv;
+use dotenv::dotenv as dotenv_linux;
+use dotenvy::dotenv as dotenv_windows;
 use serde_json::{Result, Value, Error};
 use std::fs::read_to_string;
 use regex::Regex;
@@ -19,8 +20,8 @@ static DETAILS_ENDPOINT : &str = "/api/appdetails";
 
 // Secrets
 fn get_api_key() -> String {
-    dotenv().ok();
-    println!("{:?}", std::env::var("STEAM_API_KEY"));
+    if cfg!(target_os = "windows") { dotenv_windows().ok(); }
+    else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
     let mut steam_api_token = String::new();
     match env::var("STEAM_API_KEY"){
         Ok(token) => steam_api_token = token,

@@ -1,4 +1,5 @@
-use dotenv::dotenv;
+use dotenv::dotenv as dotenv_linux;
+use dotenvy::dotenv as dotenv_windows;
 use std::sync::{Mutex};
 use std::env;
 use cfg_if::cfg_if;
@@ -49,7 +50,8 @@ pub fn delete_file(file_path: String){
 }
 
 pub fn get_data_path() -> String {
-    dotenv().ok();
+    if cfg!(target_os = "windows") { dotenv_windows().ok(); }
+    else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
     let path_env = PATH_ENV_VAR.lock().unwrap().clone();
     //println!("Env var: {:?}", path_env);
     let mut data_path = env::var(path_env).unwrap_or_else(|_| String::from("."));

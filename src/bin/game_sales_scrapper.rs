@@ -1,4 +1,5 @@
-use dotenv::dotenv;
+use dotenv::dotenv as dotenv_linux;
+use dotenvy::dotenv as dotenv_windows;
 use std::io::Write;
 use std::io;
 use clap::{arg, command, Arg, ArgAction, Command, ArgMatches};
@@ -15,7 +16,8 @@ use game_sales_scrapper::structs::gog_response::GameInfo as GOGGameInfo;
 use game_sales_scrapper::structs::microsoft_store_response::ProductInfo;
 
 fn get_recipient() -> String {
-    dotenv().ok();
+    if cfg!(target_os = "windows") { dotenv_windows().ok(); }
+    else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
     let recipient = std::env::var("RECIPIENT_EMAIL").expect("RECIPIENT_EMAIL must be set");
     recipient
 }

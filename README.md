@@ -1,14 +1,10 @@
 # Game Sales Scrapper
+![GitHub Release](https://img.shields.io/github/v/release/KofiAnnan97/game_sales_scrapper?label=Version) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/KofiAnnan97/game_sales_scrapper/build.yml?label=Build) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/KofiAnnan97/game_sales_scrapper/tests.yml?label=Tests) ![GitHub last commit](https://img.shields.io/github/last-commit/KofiAnnan97/game_sales_scrapper?label=Last%20Commit)
+
+Roadmap: [[link](./Roadmap.md)]
+
 A script that checks multiple storefront to determine if a game has reached a user-defined price. Automation can be set 
 up to send an email if any game is at or falls below their respective price threshold.
-
-### Tested Environments
-| Operating System | Testing                                                                                                    |
-|------------------|------------------------------------------------------------------------------------------------------------|
-| Ubuntu 24.04     | ![](https://github.com/KofiAnnan97/game_sales_scrapper/actions/workflows/linux.yml/badge.svg?event=push)   |
-| Windows 11       | ![](https://github.com/KofiAnnan97/game_sales_scrapper/actions/workflows/windows.yml/badge.svg?event=push) |
-
-#### Roadmap: [[link](./Roadmap.md)]
 
 ### Supported Storefronts
 - **Steam**
@@ -41,6 +37,7 @@ up to send an email if any game is at or falls below their respective price thre
         ```
         Set-ExecutionPolicy RemoteSigned
         ```
+6. [Optional] Run tests locally `cargo test -- --test-threads=1`
 
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.
