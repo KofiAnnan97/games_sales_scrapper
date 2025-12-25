@@ -23,9 +23,9 @@ jobs:
     - name: Create env file
       run: bash ./setup/actions/create_env_file.sh
     - name: Set up config for storefronts
-      run: ./target/release/game_sales_scrapper config -a -z
+      run: cargo run --release -- config -a --test_flag
     - name: Cache Steam games
-      run: ./target/release/game_sales_scrapper --update-cache --test_flag
+      run: cargo run --release -- --update-cache --test_flag
     - name: Run tests
       run: cargo test --release -- --test-threads=1
   windows:
@@ -35,8 +35,8 @@ jobs:
       - name: Create env file
         run: .\setup\actions\create_env_file.ps1
       - name: Set up config for storefronts
-        run: .\target\release\game_sales_scrapper.exe config -a -z
+        run: cargo run --release -- config -a --test_flag
       - name: Cache Steam games
-        run: .\target\release\game_sales_scrapper.exe --update-cache --test_flag
+        run: cargo run --release -- --update-cache --test_flag
       - name: Run tests
         run: cargo test --release -- --test-threads=1
