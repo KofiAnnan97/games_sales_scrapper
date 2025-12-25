@@ -1,0 +1,53 @@
+name: Tests
+on:
+  schedule:
+    - cron: "0 0 1 */4 *"
+  push:
+    branches: 
+      - "master"
+      - "release/**"
+  pull_request:
+    branches: 
+      - "master"
+      - "dev"
+env:
+  CARGO_TERM_COLOR: always
+  STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+  PROJECT_PATH: ${{ github.workspace }}
+  RUST_BACKTRACE: 1
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create env file
+      run: bash ./setup/actions/create_env_file.sh
+    - name: Check env file [DELETE LATER]
+      run: cat .env
+    - name: Set up config for storefronts
+      run: cargo run --release -- config -a --test_flag
+    - name: Cache Steam games
+      run: cargo run --release -- --update-cache --test_flag
+    - name: Run tests
+      run: cargo test --release -- --test-threads=1
+  windows:
+    needs: linux
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create env file
+        run: .\setup\actions\create_env_file.ps1
+      - name: Check env file [DELETE LATER]
+        run: cat .env
+      - name: Set up config for storefronts
+        run: cargo run --release -- config -a --test_flag
+      - name: Cache Steam games
+        run: cargo run --release -- --update-cache --test_flag
+      - name: Run tests
+        run: cargo test --release -- --test-threads=1
+      - name: Check if data exists in test folder [DELETE LATER]
+        if: always()
+        run: tree .\src\tests /f
+      - name: Check if data exists in root folder [DELETE LATER]
+        if: always()
+        run: tree .\data /f
