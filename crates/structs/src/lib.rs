@@ -1,4 +1,4 @@
 pub mod data;
-pub mod steam_response;
-pub mod gog_response;
-pub mod microsoft_store_response;
+pub mod steam;
+pub mod gog;
+pub mod microsoft_store;

@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 use file_types::json;
 use structs::data::{SaleInfo};
-use structs::steam_response::{App, PriceOverview};
+use structs::steam::{App, PriceOverview};
 
 static CACHE_FILENAME : &str = "steam_game_titles_cache.json";
 

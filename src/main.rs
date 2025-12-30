@@ -11,8 +11,8 @@ use alerting::email;
 use file_types::{csv, json};
 use file_ops::{thresholds, settings::{self, STEAM_STORE_ID, GOG_STORE_ID, MICROSOFT_STORE_ID}};
 use structs::data::{SaleInfo, SimpleGameThreshold};
-use structs::gog_response::GameInfo as GOGGameInfo;
-use structs::microsoft_store_response::ProductInfo;
+use structs::gog::GameInfo as GOGGameInfo;
+use structs::microsoft_store::ProductInfo;
 
 fn get_recipient() -> String {
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
