@@ -33,8 +33,8 @@ fn get_data_path() -> String {
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
     let mut data_path = env::var("TEST_PATH").unwrap_or_else(|_| String::from("."));
-    let path: PathBuf = [&data_path, "data"].iter().collect();
-    data_path = path.display().to_string();
+    let path_buf: PathBuf = [&data_path, "data"].iter().collect();
+    data_path = path_buf.display().to_string();
     if !Path::new(&data_path).is_dir() {
         let _ = fs::create_dir(&data_path);
     }
@@ -43,22 +43,16 @@ fn get_data_path() -> String {
 
 fn get_threshold_path() -> String {
     let mut threshold_path = get_data_path();
-    let path: PathBuf = [&threshold_path, THRESHOLD_FILENAME].iter().collect();
-    threshold_path = path.display().to_string();
-    if !Path::new(&threshold_path).is_dir() {
-        let _ = fs::create_dir(&threshold_path);
-    }
-    threshold_path
+    let path_buf: PathBuf = [threshold_path, THRESHOLD_FILENAME.to_string()].iter().collect();
+    threshold_path = path_buf.display().to_string();
+    json::get_path(&threshold_path)
 }
 
 fn get_settings_path() -> String {
     let mut settings_path = get_data_path();
-    let path: PathBuf = [&settings_path, SETTINGS_FILENAME].iter().collect();
-    settings_path = path.display().to_string();
-    if !Path::new(&settings_path).is_dir() {
-        let _ = fs::create_dir(&settings_path);
-    }
-    settings_path
+    let path_buf: PathBuf = [&settings_path, SETTINGS_FILENAME].iter().collect();
+    settings_path = path_buf.display().to_string();
+    json::get_path(&settings_path)
 }
 
 fn load_thresholds() -> Vec<GameThreshold> {
