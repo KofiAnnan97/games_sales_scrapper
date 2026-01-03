@@ -42,16 +42,15 @@ pub fn get_properties_path() -> String{
             if md.len() == 0 {
                 let vars = env_vars::get_variables();
                 if vars.is_empty() { panic!("No environment variables found. Missing file: \"{}\".", ENV_FILENAME); }
-                let key_str = env_vars::get_decrypt_key();
                 let port: u16 = vars.get(SMTP_PORT_ENV).unwrap().parse().unwrap();
                 let properties = json!({
-                    PROP_STEAM_API_KEY : passwords::encrypt(key_str.as_str(), vars.get(STEAM_API_KEY_ENV).unwrap().to_string()),
+                    PROP_STEAM_API_KEY : vars.get(STEAM_API_KEY_ENV).unwrap(),
                     PROP_RECIPIENT_EMAIL: vars.get(RECIPIENT_EMAIL_ENV).unwrap(),
                     PROP_SMTP_HOST: vars.get(SMTP_HOST_ENV).unwrap(),
                     PROP_SMTP_PORT: port,
                     PROP_SMTP_EMAIL: vars.get(SMTP_EMAIL_ENV).unwrap(),
                     PROP_SMTP_USERNAME: vars.get(SMTP_USERNAME_ENV).unwrap(),
-                    PROP_SMTP_PASSWORD: passwords::encrypt(key_str.as_str(), vars.get(SMTP_PASSWORD_ENV).unwrap().to_string()),
+                    PROP_SMTP_PASSWORD: vars.get(SMTP_PASSWORD_ENV).unwrap(),
                     PROP_PROJECT_PATH: vars.get(PROJECT_PATH_ENV).unwrap(),
                     PROP_TEST_MODE: 0
                 });
@@ -85,30 +84,34 @@ pub fn update_properties() {
         let curr_user = vars.get(SMTP_USERNAME_ENV).unwrap().to_string();
         let curr_pwd = vars.get(SMTP_PASSWORD_ENV).unwrap().to_string();
         let curr_project_path = vars.get(PROJECT_PATH_ENV).unwrap().to_string();
-        // println!("Steam API key: {} ", get_steam_api_key());
-        // println!("SMTP pwd: {} ", get_smtp_pwd());
-        // println!("Decode: {} -> {}", curr_steam_key, passwords::decrypt(curr_steam_key.clone()));
-        // println!("Decode: {} -> {}", curr_pwd, passwords::decrypt(curr_pwd.clone()));
-
+        
         let mut can_update = false;
-        if !curr_steam_key.is_empty() && prev_steam_key != passwords::decrypt(key_str.as_str(), curr_steam_key.clone()) { can_update = true }
+        let mut steam_api_key_updated = false;
+        let mut smtp_pwd_updated = false;
+        if !curr_steam_key.is_empty() && prev_steam_key != passwords::decrypt(key_str.as_str(), curr_steam_key.clone()) {
+            steam_api_key_updated = true;
+            can_update = true;
+        }
         if !curr_recipient.is_empty() && prev_recipient != curr_recipient { can_update = true; }
         if !can_update && !curr_host.is_empty() && prev_host != curr_host { can_update = true; }
         if !can_update && prev_port != curr_port { can_update = true; }
         if !can_update && !curr_email.is_empty() && prev_email != curr_email { can_update = true; }
         if !can_update && !curr_user.is_empty() && prev_user != curr_user { can_update = true; }
-        if !can_update && !curr_pwd.is_empty() && prev_pwd != passwords::decrypt(key_str.as_str(), curr_pwd.clone()) { can_update = true; }
+        if !curr_pwd.is_empty() && prev_pwd != passwords::decrypt(key_str.as_str(), curr_pwd.clone()) {
+            smtp_pwd_updated = true;
+            can_update = true;
+        }
         if !can_update && !curr_project_path.is_empty() && prev_project_path != curr_project_path { can_update = true; }
         //println!("Test mode: {}", get_test_mode());
         if can_update {
             let properties = json!({
-            PROP_STEAM_API_KEY : if !curr_steam_key.is_empty() { curr_steam_key } else { passwords::encrypt(key_str.as_str(), prev_steam_key) },
+            PROP_STEAM_API_KEY : if steam_api_key_updated && !curr_steam_key.is_empty() { curr_steam_key } else { get_string_var(PROP_STEAM_API_KEY) },
             PROP_RECIPIENT_EMAIL: if !curr_recipient.is_empty() { curr_recipient } else { prev_recipient },
             PROP_SMTP_HOST: if !curr_host.is_empty() { curr_host } else { prev_host },
             PROP_SMTP_PORT: curr_port,
             PROP_SMTP_EMAIL: if !curr_email.is_empty() { curr_email } else { prev_email },
             PROP_SMTP_USERNAME: if !curr_user.is_empty() { curr_user } else { prev_user },
-            PROP_SMTP_PASSWORD: if !curr_pwd.is_empty() { curr_pwd } else { passwords::encrypt(key_str.as_str(), prev_pwd) },
+            PROP_SMTP_PASSWORD: if smtp_pwd_updated && !curr_pwd.is_empty() { curr_pwd } else { get_string_var(PROP_SMTP_PASSWORD) },
             PROP_PROJECT_PATH: if !curr_project_path.is_empty() { curr_project_path } else { prev_project_path },
             PROP_TEST_MODE: get_test_mode(),
         });
