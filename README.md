@@ -27,9 +27,9 @@ up to send an email if any game is at or falls below their respective price thre
     TEST_PATH={/path/to/test_directory}
     ```
     - For Windows use `\\` when defining the path.
-
-4. Add games and their respective price threshold using the [support commands](#supported-commands) below (supports commands from cargo).
-5. [Optional] Automate emails (in `setup/` folder)
+4. Initialize settings and properties (refer to [supported commands](#supported-commands))
+5. Add games and their respective price threshold using the [support commands](#supported-commands) below (supports commands from cargo).
+6. [Optional] Automate emails (in `setup/` folder)
     - **For Unix-based systems:** Update *SCHEDULE* variable to desired execution frequency and run `set_cron.sh -c "create"` with root privileges.
     - **For Windows systems:** Update *$trigger* variable to desired execution frequency and run `set_task_scheduler.ps1 -Cmd "create"`. 
     
@@ -37,14 +37,18 @@ up to send an email if any game is at or falls below their respective price thre
         ```
         Set-ExecutionPolicy RemoteSigned
         ```
-6. [Optional] Run tests locally `cargo test -- --test-threads=1`
+7. [Optional] Run tests locally `cargo test -- --test-threads=1`
 
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.
 - `config` := sets what storefronts are used to search for games and enable aliases for game titles (enabled by default). 
-Use `-a` to search through all supported storefronts and can be configured to be more granular. This command will override previous settings.
-    ```commandline
-    game_sales_scrapper config -a
+    - [`-a`,`-s`, `-g`, `-m`]  := determine which storefronts to search. This command will override previous choices.
+    - `-e` := set whether aliases are enabled for games
+    - `-r` := set whether an alias can be reused (good for dealing with stores that use different names for the same product)
+    - `-p` := update properties using `.env` file
+    - `-z` := toggles whether the testing mode is enabled (if enabled script uses `TEST_PATH` env)
+  ```commandline
+    game_sales_scrapper config -a -e 1 -r 0
     ```
 - `add` := add a specified game (title must be exact to work).
     ```commandline

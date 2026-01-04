@@ -39,7 +39,3 @@ pub fn generate_csv(file_path: &str, thresholds: Vec<SimpleGameThreshold>) {
     }
     common::write_to_file(file_path.to_owned(), data);
 }
-
-pub fn delete_file(file_path: String){
-    common::delete_file(file_path);
-}

@@ -5,29 +5,12 @@ use serde_json::{json, Value, Result};
 use file_types::common;
 pub mod env_vars;
 pub mod passwords;
-use env_vars::{ENV_FILENAME, STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
-               SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV};
-
-// Environment variable names
-pub static PROJECT_PATH_ENV : &str = "PROJECT_PATH";
-pub static TEST_PATH_ENV : &str = "TEST_PATH";
-
-// Directories
-static DATA_DIR : &str = "data";
-
-// Filenames
-static PROPERTIES_FILENAME : &str = "properties.json";
-
-// Properties variable names
-static PROP_STEAM_API_KEY : &str = "steam_api_key";
-static PROP_RECIPIENT_EMAIL : &str = "recipient_email";
-static PROP_SMTP_HOST : &str = "smtp_host";
-static PROP_SMTP_PORT : &str = "smtp_port";
-static PROP_SMTP_EMAIL : &str = "smtp_email";
-static PROP_SMTP_USERNAME : &str = "smtp_user";
-static PROP_SMTP_PASSWORD : &str = "smtp_pwd";
-static PROP_PROJECT_PATH : &str = "project_path";
-static PROP_TEST_MODE : &str = "test_mode";
+mod constants;
+use constants::{DATA_DIR, PROPERTIES_FILENAME, PROJECT_PATH_ENV, ENV_FILENAME,
+                STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
+                SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, PROP_STEAM_API_KEY,
+                PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, PROP_SMTP_PORT, PROP_SMTP_EMAIL,
+                PROP_SMTP_USERNAME, PROP_SMTP_PASSWORD, PROP_PROJECT_PATH, PROP_TEST_MODE};
 
 pub fn get_properties_path() -> String{
     let project_path = env_vars::get_project_path();

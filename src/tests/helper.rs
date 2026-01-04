@@ -10,10 +10,10 @@ use structs::data::GameThreshold;
 use file_ops::thresholds::{ALIAS_MAP, THRESHOLDS};
 use file_ops::settings::{ALIASES_ENABLED, ALLOW_ALIAS_REUSE_AFTER_CREATION, SELECTED_STORES};
 
-pub static THRESHOLD_FILENAME: &str = "thresholds.json";
-pub static SETTINGS_FILENAME: &str = "config.json";
+pub(in crate::tests) static THRESHOLD_FILENAME: &str = "thresholds.json";
+pub(in crate::tests) static SETTINGS_FILENAME: &str = "config.json";
 
-pub fn get_data_path() -> String {
+pub(in crate::tests) fn get_data_path() -> String {
     if !properties::is_testing_enabled() { properties::set_test_mode(true); }
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
@@ -26,7 +26,7 @@ pub fn get_data_path() -> String {
     data_path
 }
 
-pub fn get_threshold_path() -> String {
+pub(in crate::tests) fn get_threshold_path() -> String {
     let path_buf: PathBuf = [get_data_path(), THRESHOLD_FILENAME.to_string()].iter().collect();
     let threshold_path = path_buf.display().to_string();
     let path_str = common::get_path(&threshold_path);
@@ -46,21 +46,21 @@ pub fn get_threshold_path() -> String {
     path_str
 }
 
-pub fn get_settings_path() -> String {
+pub(in crate::tests) fn get_settings_path() -> String {
     let mut settings_path = get_data_path();
     let path_buf: PathBuf = [&settings_path, SETTINGS_FILENAME].iter().collect();
     settings_path = path_buf.display().to_string();
     common::get_path(&settings_path)
 }
 
-pub fn clear_settings() {
+pub(in crate::tests) fn clear_settings() {
     if !properties::is_testing_enabled() { properties::set_test_mode(true); }
     let settings = json!({SELECTED_STORES: [], ALIASES_ENABLED: 1, ALLOW_ALIAS_REUSE_AFTER_CREATION: 1});
     let settings_str = serde_json::to_string_pretty(&settings);
     common::write_to_file(get_settings_path(), settings_str.expect("Clear settings."));
 }
 
-pub fn clear_thresholds(){
+pub(in crate::tests) fn clear_thresholds(){
     if !properties::is_testing_enabled() { properties::set_test_mode(true); }
     let thresholds = json!({
         THRESHOLDS.to_string(): [],
@@ -70,13 +70,13 @@ pub fn clear_thresholds(){
     common::write_to_file(get_threshold_path(), thresholds_str.expect("Clear thresholds."));
 }
 
-pub fn load_threshold_data() -> Result<Value> {
+pub(in crate::tests) fn load_threshold_data() -> Result<Value> {
     let filepath = get_threshold_path();
     let data = read_to_string(filepath).unwrap();
     serde_json::from_str(&data)
 }
 
-pub fn load_thresholds() -> Vec<GameThreshold> {
+pub(in crate::tests) fn load_thresholds() -> Vec<GameThreshold> {
     let filepath = get_threshold_path();
     let data = read_to_string(filepath).unwrap();
     let body: Value = serde_json::from_str(&data).expect("Cannot parse threshold for testing");
@@ -84,7 +84,7 @@ pub fn load_thresholds() -> Vec<GameThreshold> {
     serde_json::from_str::<Vec<GameThreshold>>(&thresholds).unwrap_or_default()
 }
 
-pub fn load_stores() -> Vec<String> {
+pub(in crate::tests) fn load_stores() -> Vec<String> {
     let filepath = get_settings_path();
     let data = read_to_string(filepath).unwrap();
     let body : Value = serde_json::from_str(&data).expect("Get selected stores - could not convert to JSON");
@@ -92,7 +92,7 @@ pub fn load_stores() -> Vec<String> {
     serde_json::from_str::<Vec<String>>(&selected).unwrap_or_default()
 }
 
-pub fn load_alias_state() -> bool{
+pub(in crate::tests) fn load_alias_state() -> bool{
     let filepath = get_settings_path();
     let data = read_to_string(filepath).unwrap();
     let body : Value = serde_json::from_str(&data).expect("Get alias state - could not convert to JSON");
@@ -100,6 +100,6 @@ pub fn load_alias_state() -> bool{
     serde_json::from_str::<bool>(&alias_enabled).unwrap_or_else(|_|false)
 }
 
-pub fn teardown(){
+pub(in crate::tests) fn teardown(){
     properties::set_test_mode(false);
 }

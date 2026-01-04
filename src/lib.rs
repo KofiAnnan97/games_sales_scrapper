@@ -6,6 +6,7 @@ pub mod tests {
     pub mod unit{
         pub mod settings;
         pub mod thresholds;
+        pub mod passwords;
     }
     // Integration Testing
     pub mod api{
