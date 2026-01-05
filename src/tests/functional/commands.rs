@@ -18,8 +18,8 @@ use crate::tests::helper::{self, get_threshold_path};
 
 // Sample Game Data IDs
 static E33_GAME_TITLE: &str = "Clair Obscur: Expedition 33";
-static E33_STEAM_ID: usize = 1903340;
-static E33_GOG_ID: usize = 2125022825;
+static E33_STEAM_ID: u32 = 1903340;
+static E33_GOG_ID: u32 = 2125022825;
 static E33_MS_ID: &str = "9ppt8k6gqhrz";
 
 // Regex patterns
@@ -31,7 +31,7 @@ fn add_fake_threshold(alias: &str, title: &str, price: f64) {
     add_threshold(alias, title, 1, 2, "c", price);
 }
 
-fn add_threshold(alias: &str, title: &str, steam_id: usize, gog_id: usize, ms_id: &str, price: f64) {
+fn add_threshold(alias: &str, title: &str, steam_id: u32, gog_id: u32, ms_id: &str, price: f64) {
     let game_thresh = GameThreshold{
         title: String::from(title),
         alias: String::from(alias),

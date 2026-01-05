@@ -3,7 +3,7 @@ use stores::steam;
 
 // Constants
 static GAME_TITLE: &str = "Half-Life 2";
-static GAME_ID: usize = 220;
+static GAME_ID: u32 = 220;
 
 #[tokio::test]
 async fn search_game() {

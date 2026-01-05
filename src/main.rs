@@ -467,7 +467,7 @@ async fn main(){
             if cmd.get_flag("thresholds") { thresholds::list_games(); }
             else if cmd.get_flag("selected-stores") { settings::list_selected(); }
             else if cmd.get_flag("cache"){
-                println!("Caching started");
+                println!("Caching started (this might take a while)...");
                 steam::update_cached_games().await;
             }
             else if cmd.get_flag("check-prices") {

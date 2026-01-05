@@ -20,8 +20,8 @@ pub struct SimpleGameThreshold {
 pub struct GameThreshold{
     pub title: String,
     pub alias: String,
-    pub steam_id: usize,
-    pub gog_id: usize,
+    pub steam_id: u32,
+    pub gog_id: u32,
     pub microsoft_store_id: String,
     pub currency: String,
     pub desired_price: f64,
