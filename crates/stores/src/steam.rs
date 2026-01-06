@@ -18,7 +18,7 @@ static APP_LIST_ENDPOINT : &str = "/IStoreService/GetAppList/v1";
 static DETAILS_ENDPOINT : &str = "/api/appdetails";
 
 static NUM_OF_RESULTS : u32 = 40000;
-static ROLLING_UPDATE_START_SIZE : usize = 100000;
+static SLIDING_UPDATE_START_SIZE : usize = 100000;
 
 // Caching Functions
 fn get_cache_path() -> String{
@@ -42,6 +42,7 @@ fn get_last_appid(cached_games: &Vec<App>) -> u32 {
     }
 }
 
+// Adds/updates entries in cache then empties the list contains potentially new games
 fn add_entries_to_cache(new_games: &mut Vec<App>, cached_games: &mut Vec<App>){
     let mut game_idx = 0;
     for ng in new_games.iter() {
@@ -81,9 +82,9 @@ pub async fn update_cached_games(){
     let last_appid = get_last_appid(&games_list);
     let mut temp : Vec<App> = get_games(&client, NUM_OF_RESULTS, last_appid).await.unwrap_or_default();
     add_entries_to_cache(&mut temp, &mut games_list);
-    let rolling_last_appid = properties::get_sliding_steam_appid();
-    if rolling_last_appid < last_appid  && games_list.len() > ROLLING_UPDATE_START_SIZE {
-        temp = get_games(&client, NUM_OF_RESULTS, rolling_last_appid).await.unwrap_or_default();
+    let sliding_last_appid = properties::get_sliding_steam_appid();
+    if sliding_last_appid < last_appid  && games_list.len() > SLIDING_UPDATE_START_SIZE {
+        temp = get_games(&client, NUM_OF_RESULTS, sliding_last_appid).await.unwrap_or_default();
         properties::set_sliding_steam_appid(temp.last().unwrap().app_id);
         add_entries_to_cache(&mut temp, &mut games_list);
     }

@@ -98,6 +98,7 @@ pub fn update_properties() {
             PROP_SMTP_USERNAME: if !curr_user.is_empty() { curr_user } else { prev_user },
             PROP_SMTP_PASSWORD: if smtp_pwd_updated && !curr_pwd.is_empty() { curr_pwd } else { get_string_var(PROP_SMTP_PASSWORD) },
             PROP_PROJECT_PATH: if !curr_project_path.is_empty() { curr_project_path } else { prev_project_path },
+            PROP_SLIDING_STEAM_APPID: get_sliding_steam_appid(),
             PROP_TEST_MODE: get_test_mode(),
         });
             let properties_str = serde_json::to_string_pretty(&properties);
