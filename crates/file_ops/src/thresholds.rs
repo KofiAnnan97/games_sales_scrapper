@@ -150,8 +150,8 @@ pub fn add_gog_game(new_alias: String, game: &GOGGameInfo, price: f64){
         if is_threshold(&game.title, elem){
             unique = false;
             if elem.gog_id == 0 {
-                let game_id = game.id.parse::<u64>().unwrap();
-                update_id(&elem.title, settings::GOG_STORE_ID, game_id as usize);
+                let game_id = game.id.parse::<u32>().unwrap();
+                update_id(&elem.title, settings::GOG_STORE_ID, game_id);
             }
             break;
         }
@@ -174,7 +174,7 @@ pub fn add_gog_game(new_alias: String, game: &GOGGameInfo, price: f64){
             title: game.title.clone(),
             alias: alias_str,
             steam_id: 0,
-            gog_id: game.id.parse::<u64>().unwrap() as usize,
+            gog_id: game.id.parse::<u32>().unwrap(),
             microsoft_store_id: String::new(),
             //currency: game.price.currency.clone(), // Version 1
             currency: currency_code,
@@ -280,7 +280,7 @@ pub fn update_price(title: &str, price: f64) {
     else{ println!("\"{}\" does not have a configured threshold.", title); }
 }
 
-pub fn update_id(title: &str, store_type: &str, id: usize){
+pub fn update_id(title: &str, store_type: &str, id: u32){
     let mut thresholds = load_thresholds().unwrap_or_else(|_e|Vec::new());
     let idx = thresholds.iter().position(|threshold| is_threshold(title, threshold));
     //println!("{:?}", idx);

@@ -5,29 +5,13 @@ use serde_json::{json, Value, Result};
 use file_types::common;
 pub mod env_vars;
 pub mod passwords;
-use env_vars::{ENV_FILENAME, STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
-               SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV};
-
-// Environment variable names
-pub static PROJECT_PATH_ENV : &str = "PROJECT_PATH";
-pub static TEST_PATH_ENV : &str = "TEST_PATH";
-
-// Directories
-static DATA_DIR : &str = "data";
-
-// Filenames
-static PROPERTIES_FILENAME : &str = "properties.json";
-
-// Properties variable names
-static PROP_STEAM_API_KEY : &str = "steam_api_key";
-static PROP_RECIPIENT_EMAIL : &str = "recipient_email";
-static PROP_SMTP_HOST : &str = "smtp_host";
-static PROP_SMTP_PORT : &str = "smtp_port";
-static PROP_SMTP_EMAIL : &str = "smtp_email";
-static PROP_SMTP_USERNAME : &str = "smtp_user";
-static PROP_SMTP_PASSWORD : &str = "smtp_pwd";
-static PROP_PROJECT_PATH : &str = "project_path";
-static PROP_TEST_MODE : &str = "test_mode";
+mod constants;
+use constants::{DATA_DIR, PROPERTIES_FILENAME, PROJECT_PATH_ENV, ENV_FILENAME,
+                STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
+                SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, PROP_STEAM_API_KEY,
+                PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, PROP_SMTP_PORT, PROP_SMTP_EMAIL,
+                PROP_SMTP_USERNAME, PROP_SMTP_PASSWORD, PROP_PROJECT_PATH, PROP_TEST_MODE,
+                PROP_SLIDING_STEAM_APPID};
 
 pub fn get_properties_path() -> String{
     let project_path = env_vars::get_project_path();
@@ -52,6 +36,7 @@ pub fn get_properties_path() -> String{
                     PROP_SMTP_USERNAME: vars.get(SMTP_USERNAME_ENV).unwrap(),
                     PROP_SMTP_PASSWORD: vars.get(SMTP_PASSWORD_ENV).unwrap(),
                     PROP_PROJECT_PATH: vars.get(PROJECT_PATH_ENV).unwrap(),
+                    PROP_SLIDING_STEAM_APPID: 0,
                     PROP_TEST_MODE: 0
                 });
                 let properties_str = serde_json::to_string_pretty(&properties);
@@ -113,6 +98,7 @@ pub fn update_properties() {
             PROP_SMTP_USERNAME: if !curr_user.is_empty() { curr_user } else { prev_user },
             PROP_SMTP_PASSWORD: if smtp_pwd_updated && !curr_pwd.is_empty() { curr_pwd } else { get_string_var(PROP_SMTP_PASSWORD) },
             PROP_PROJECT_PATH: if !curr_project_path.is_empty() { curr_project_path } else { prev_project_path },
+            PROP_SLIDING_STEAM_APPID: get_sliding_steam_appid(),
             PROP_TEST_MODE: get_test_mode(),
         });
             let properties_str = serde_json::to_string_pretty(&properties);
@@ -197,6 +183,11 @@ pub fn get_project_path() -> String {
     get_string_var(PROP_PROJECT_PATH)
 }
 
+pub fn get_sliding_steam_appid() -> u32{
+    let steam_appid = get_integer_var(PROP_SLIDING_STEAM_APPID);
+    if steam_appid > 0 { steam_appid as u32 } else { 0 }
+}
+
 pub fn get_test_mode() -> i16 {
     get_integer_var(PROP_TEST_MODE) as i16
 }
@@ -213,8 +204,20 @@ pub fn set_test_mode(is_enabled: bool) {
             let enabled = if is_enabled { 1 } else { 0 };
             *properties.get_mut(PROP_TEST_MODE).unwrap() = json!(enabled);
             let properties_str = serde_json::to_string_pretty(&properties);
-            common::write_to_file(get_properties_path(), properties_str.expect("Test mode properties could not be created."));
+            common::write_to_file(get_properties_path(), properties_str.expect("Test mode property could not be created."));
         },
+        Err(e) => eprintln!("Error: {}", e)
+    }
+}
+
+pub fn set_sliding_steam_appid(steam_appid: u32) {
+    match load_properties() {
+        Ok(data) => {
+            let mut properties = data;
+            *properties.get_mut(PROP_SLIDING_STEAM_APPID).unwrap() = json!(steam_appid);
+            let properties_str = serde_json::to_string_pretty(&properties);
+            common::write_to_file(get_properties_path(), properties_str.expect("Refresh steam appid property could not be created."));
+        }
         Err(e) => eprintln!("Error: {}", e)
     }
 }

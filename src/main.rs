@@ -145,7 +145,7 @@ async fn gog_insert_sequence(alias: &str, title: &str, price: f64, client: &reqw
         }
         println!("  [q] SKIP");
         let mut input = String::new();
-        print!("Type integer corresponding to game title or type \"q\" to quit: ");
+        print!("Type integer corresponding to game title or type \'q\' to skip: ");
         let _ = io::stdout().flush();
         io::stdin()
             .read_line(&mut input)
@@ -467,7 +467,7 @@ async fn main(){
             if cmd.get_flag("thresholds") { thresholds::list_games(); }
             else if cmd.get_flag("selected-stores") { settings::list_selected(); }
             else if cmd.get_flag("cache"){
-                println!("Caching started");
+                println!("Caching started (this might take a while)...");
                 steam::update_cached_games().await;
             }
             else if cmd.get_flag("check-prices") {

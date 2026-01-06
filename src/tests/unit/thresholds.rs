@@ -112,7 +112,7 @@ fn add_gog_game() {
     delete_thresholds();
     let game = test_gog_game();
     let game_title = &game.title.clone();
-    let game_id = game.id.parse::<usize>().unwrap();
+    let game_id = game.id.parse::<u32>().unwrap();
     thresholds::add_gog_game(game_title.clone(), &game, 10.00);
 
     match thresholds::load_thresholds() {
