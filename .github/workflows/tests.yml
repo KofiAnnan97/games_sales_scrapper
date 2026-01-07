@@ -8,6 +8,7 @@ on:
     branches: 
       - "master"
       - "release/**"
+      - "fix/github-actions-windows-test"
   pull_request:
     branches: 
       - "master"
@@ -47,11 +48,16 @@ jobs:
           rustflags: "-A warnings"
       - name: Create env file
         run: .\setup\actions\create_env_file.ps1
+      - name: Display env file [DELETE LATER]
+        run: cat .env
       - name: Set up config for storefronts
+        if: always()
         run: cargo run --release -- config -a --test_mode 1
-      - name: Cache Steam games
+      - name: Cache Steam
+        if: always()
         run: cargo run --release -- --update-cache
       - name: Run tests
+        if: always()
         run: cargo test --release -- --test-threads=1 --show-output
       - name: Check if data exists in test folder [DELETE LATER]
         if: always()
