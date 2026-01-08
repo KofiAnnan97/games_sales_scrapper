@@ -68,7 +68,8 @@ fn get_sample_csv(filename: &str) -> String {
     ];
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
-    let test_path = std::env::var("TEST_PATH").unwrap_or(String::from("."));
+    //let test_path = std::env::var("TEST_PATH").unwrap_or(String::from("."));
+    let test_path = properties::get_data_path();
     let path_buf: PathBuf = [&test_path, "data", filename].iter().collect();
     let csv_path = path_buf.display().to_string();
     csv::generate_csv(&csv_path, thresholds);
@@ -85,7 +86,7 @@ fn config_cmd() {
             .expect("failed to execute process")
     } else {
         Command::new("cargo")
-            .args(["run","--","config","-s","-g","-e","0"])
+            .args(["run","--release","--","config","-s","-g","-e","0"])
             .output()
             .expect("failed to execute process")
     };
@@ -126,7 +127,7 @@ async fn add_cmd() {
 
     // Update settings
     let _ = Command::new("cargo")
-        .args(["run","--","config","-a","-e","1"])
+        .args(["run","--release","--","config","-a","-e","1"])
         .output()
         .expect("failed to execute proces");
 
@@ -199,7 +200,7 @@ fn update_price_cmd() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","update","-t",title,"-p",new_price])
+            .args(["run","--release","--","update","-t",title,"-p",new_price])
             .output()
             .expect("failed to execute process")
     };
@@ -217,7 +218,7 @@ fn update_price_cmd() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","update","-t",alias,"-p",new_price])
+            .args(["run","--release","--","update","-t",alias,"-p",new_price])
             .output()
             .expect("failed to execute process")
     };
@@ -246,7 +247,7 @@ fn remove_cmd() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","remove","-t", title])
+            .args(["run","--release","--","remove","-t", title])
             .output()
             .expect("failed to execute process")
     };
@@ -262,7 +263,7 @@ fn remove_cmd() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","remove","-t", alias])
+            .args(["run","--release","--","remove","-t", alias])
             .output()
             .expect("failed to execute process")
     };
@@ -282,7 +283,7 @@ fn list_selected_stores_cmd() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","config","-m"])
+            .args(["run","--release","--","config","-m"])
             .output()
             .expect("failed to execute process")
     };
@@ -294,7 +295,7 @@ fn list_selected_stores_cmd() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","--list-selected-stores", "--test_flag"])
+            .args(["run","--release","--","--list-selected-stores", "--test_flag"])
             .output()
             .expect("failed to execute process")
     };
@@ -339,7 +340,7 @@ fn list_thresholds_cmd() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","--list-thresholds"])
+            .args(["run","--release","--","--list-thresholds"])
             .output()
             .expect("failed to execute process")
     };
@@ -371,7 +372,7 @@ async fn check_prices() {
             .expect("failed to execute process")
     } else{
         Command::new("cargo")
-            .args(["run","--","--check-prices"])
+            .args(["run","--release","--","--check-prices"])
             .output()
             .expect("failed to execute process")
     };

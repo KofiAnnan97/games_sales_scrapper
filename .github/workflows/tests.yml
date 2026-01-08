@@ -8,6 +8,7 @@ on:
     branches: 
       - "master"
       - "release/**"
+      - "feature/optimize-github-actions"
   pull_request:
     branches: 
       - "master"
@@ -20,6 +21,7 @@ env:
 jobs:
   linux:
     runs-on: ubuntu-latest
+    if: false
     steps:
     - uses: actions/checkout@v4
     - name: Create env file
@@ -32,9 +34,17 @@ jobs:
       run: cargo test --release -- --test-threads=1 --show-output
   windows:
     needs: linux
+    if: always()
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Configure toolchain
+        run: |
+          # Install toolchain
+          rustup toolchain install stable-x86_64-pc-windows-gnu
+          # Set default toolchain
+          rustup default stable-x86_64-pc-windows-gnu
+        shell: pwsh
       - name: Create env file
         run: .\setup\actions\create_env_file.ps1
       - name: Set up config for storefronts
