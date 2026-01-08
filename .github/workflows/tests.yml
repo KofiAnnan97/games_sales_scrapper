@@ -45,6 +45,7 @@ jobs:
           # Set default toolchain
           rustup default stable-x86_64-pc-windows-gnu
           # List toolchains
+          echo "List Toolchains:"
           rustup toolchain list
         shell: pwsh
       - name: Create env file
