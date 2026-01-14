@@ -425,6 +425,7 @@ async fn main(){
         },
         Some(("add", add_args)) => {
             let selected_stores = storefront_check();
+            if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let alias = if add_args.contains_id("alias") && settings::get_alias_state() {
                 add_args.get_one::<String>("alias").unwrap().clone()
             } else {
@@ -447,6 +448,7 @@ async fn main(){
         },
         Some(("bulk-insert", bulk_args)) => {
             let selected_stores = storefront_check();
+            if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let mut game_list: Vec<SimpleGameThreshold> = Vec::new();
             let file_path = bulk_args.get_one::<String>("file").unwrap().clone();
             match csv::parse_game_prices(&file_path){
@@ -473,15 +475,18 @@ async fn main(){
             }
         },
         Some(("update", update_args)) => {
+            if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let title = update_args.get_one::<String>("title").unwrap().clone();
             let price = update_args.get_one::<f64>("price").unwrap().clone();
             thresholds::update_price(&title, price);
         },
         Some(("remove", remove_args)) => {
+            if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let title = remove_args.get_one::<String>("title").unwrap().clone();
             thresholds::remove(&title);
         },
         _ => {
+            if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             if cmd.get_flag("thresholds") { thresholds::list_games(); }
             else if cmd.get_flag("selected-stores") { settings::list_selected(); }
             else if cmd.get_flag("cache"){

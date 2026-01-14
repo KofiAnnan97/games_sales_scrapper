@@ -51,13 +51,14 @@ at or falls below their respective price threshold.
 ## Supported Commands
 Use the`--help` flag in command line to get more information on the supported commands. Here's a brief description and example of each command.
 - `config` := sets what storefronts are used to search for games and enable aliases for game titles (enabled by default). 
-    - [`-a`,`-s`, `-g`, `-m`]  := determine which storefronts to search. This command will override previous choices.
-    - `-e` := set whether aliases are enabled for games
-    - `-r` := set whether an alias can be reused (good for dealing with stores that use different names for the same product)
-    - `-p` := update properties using `.env` file
-    - `-z` := toggles whether the testing mode is enabled (if enabled script uses `TEST_PATH` env)
+    - `settings` := determine which storefront to search, whether aliases are enabled for games, and whether an alias can be reused (useful for different editions of the same product)
+    -  `properties` := set the properties based on `.env` file or command line
+        - `-z` := toggles whether the testing mode is enabled (if enabled script uses `TEST_PATH` env)
   ```commandline
-    game_sales_scrapper config -a -e 1 -r 0
+    # Configure settings 
+    game_sales_scrapper config settings -a -e 1 -r 0
+    # Update properties with .env
+    game_sales_scrapper config properties -p
     ```
 - `add` := add a specified game (title must be exact to work).
     ```commandline

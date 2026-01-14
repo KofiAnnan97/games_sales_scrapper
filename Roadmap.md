@@ -8,8 +8,8 @@
     - [X] Write encrypt and decrypt function for secrets/passwords
   - [X] Turn properties and settings in subcommands for config cmd
     - [X] Setup separate config folder for settings and properties data
+  - [X] Add visual reminder if test mode is enabled
   - [ ] Allow for properties to be created/updated without .env file 
-  - [ ] Add visual reminder if test mode is enabled
 - Bugs/Fixes
   - [X] Fix GOG discount percentage (manually calculate)
   - [X] Fixed thresholds with same alias to support update and remove command
