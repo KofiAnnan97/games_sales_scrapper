@@ -11,7 +11,7 @@ use file_ops::thresholds::{ALIAS_MAP, THRESHOLDS};
 use file_ops::settings::{ALIASES_ENABLED, ALLOW_ALIAS_REUSE_AFTER_CREATION, SELECTED_STORES};
 
 pub(in crate::tests) static THRESHOLD_FILENAME: &str = "thresholds.json";
-pub(in crate::tests) static SETTINGS_FILENAME: &str = "config.json";
+pub(in crate::tests) static SETTINGS_FILENAME: &str = "settings.json";
 
 pub(in crate::tests) fn get_data_path() -> String {
     if !properties::is_testing_enabled() { properties::set_test_mode(true); }
@@ -24,6 +24,19 @@ pub(in crate::tests) fn get_data_path() -> String {
         let _ = fs::create_dir(&data_path);
     }
     data_path
+}
+
+pub(in crate::tests) fn get_config_path() -> String {
+    if !properties::is_testing_enabled() { properties::set_test_mode(true); }
+    if cfg!(target_os = "windows") { dotenv_windows().ok(); }
+    else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
+    let mut config_path = env::var("TEST_PATH").unwrap_or_else(|_| String::from("."));
+    let path_buf: PathBuf = [&config_path, "config"].iter().collect();
+    config_path = path_buf.display().to_string();
+    if !Path::new(&config_path).is_dir() {
+        let _ = fs::create_dir(&config_path);
+    }
+    config_path
 }
 
 pub(in crate::tests) fn get_threshold_path() -> String {
@@ -47,7 +60,7 @@ pub(in crate::tests) fn get_threshold_path() -> String {
 }
 
 pub(in crate::tests) fn get_settings_path() -> String {
-    let mut settings_path = get_data_path();
+    let mut settings_path = get_config_path();
     let path_buf: PathBuf = [&settings_path, SETTINGS_FILENAME].iter().collect();
     settings_path = path_buf.display().to_string();
     common::get_path(&settings_path)

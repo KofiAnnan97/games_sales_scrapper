@@ -1,5 +1,6 @@
 // Directories
 pub(crate) static DATA_DIR : &str = "data";
+pub(crate) static CONFIG_DIR : &str = "config";
 
 // Filenames
 pub(crate) static PROPERTIES_FILENAME : &str = "properties.json";

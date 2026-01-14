@@ -78,9 +78,9 @@ fn get_sample_csv(filename: &str) -> String {
 
 #[test]
 fn config_cmd() {
-    helper::clear_settings();
+    helper::clear_settings(); 
     let _ = Command::new("cargo")
-        .args(["run","--release","--","config","-s","-g","-e","0"])
+        .args(["run","--release","--","config","settings","-s","-g","-e","0"])
         .output()
         .expect("failed to execute process");
     let stores = helper::load_stores();
@@ -120,7 +120,7 @@ async fn add_cmd() {
 
     // Update settings
     let _ = Command::new("cargo")
-        .args(["run","--release","--","config","-a","-e","1"])
+        .args(["run","--release","--","config","settings","-a","-e","1"])
         .output()
         .expect("failed to execute proces");
 
@@ -153,7 +153,7 @@ async fn bulk_insert_cmd() {
 
     // Update settings
     let _ = Command::new("cargo")
-        .args(["run","--","config","-a","-e","0"])
+        .args(["run","--","config","settings","-a","-e","0"])
         .output()
         .expect("failed to execute proces");
 
@@ -242,7 +242,7 @@ fn list_selected_stores_cmd() {
     helper::clear_settings();
 
     let _ = Command::new("cargo")
-        .args(["run","--release","--","config","-m"])
+        .args(["run","--release","--","config","settings","-m"])
         .output()
         .expect("failed to execute process");
 

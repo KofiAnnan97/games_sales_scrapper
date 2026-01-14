@@ -7,14 +7,17 @@ use rand::distr::{Alphanumeric, SampleString};
 
 use file_types::common;
 use crate::passwords;
-use crate::constants::{DATA_DIR, DECRYPT_FILENAME, ENV_FILENAME, STEAM_API_KEY_ENV, 
+use crate::constants::{CONFIG_DIR, DECRYPT_FILENAME, ENV_FILENAME, STEAM_API_KEY_ENV, 
                        RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
                        SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, 
                        PROJECT_PATH_ENV, TEST_PATH_ENV};
 
 pub fn get_decrypt_key() -> String{
-    let path_buf: PathBuf = [get_project_path().as_str(), DATA_DIR, DECRYPT_FILENAME].iter().collect();
-    let path_str = path_buf.display().to_string();
+    let mut path_buf: PathBuf = [get_project_path().as_str(), CONFIG_DIR].iter().collect();
+    let mut path_str: String = path_buf.display().to_string();
+    if !path_buf.is_dir() { let _ = fs::create_dir(&path_str); }
+    path_buf = [&path_str, DECRYPT_FILENAME].iter().collect();
+    path_str = path_buf.display().to_string();
     let mut key_str = String::new();
     if !path_buf.is_file() { 
         File::create_new(&path_str).expect("Failed to create decrypt key file");

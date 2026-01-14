@@ -249,11 +249,11 @@ async fn main(){
         .action(ArgAction::Set)
         .value_parser(clap::value_parser!(i32))
         .required(false);
-    let allow_alias_reuse_arg = arg!(-r --allow_alias_reuse "Enable alias reuse after initial creation")
+    let allow_alias_reuse_arg = arg!(-r --allow_alias_reuse "Enable alias reuse after initial creation (Possible options: [0,1])")
         .action(ArgAction::Set)
         .value_parser(clap::value_parser!(i32))
         .required(false);
-    let update_properties_arg = arg!(-p --update_properties "Update properties using env file")
+    let update_properties_via_env_arg = arg!(-p --update_properties_via_env "Update properties using env file")
         .action(ArgAction::SetTrue)
         .conflicts_with("test_mode")
         .required(false);
@@ -267,17 +267,27 @@ async fn main(){
         .about("A simple script for checking prices on games.")
         .subcommand(
             Command::new("config")
-                .about("Set which store fronts are searched")
-                .args([
-                    &steam_store_arg,
-                    &gog_store_arg,
-                    &microsoft_store_arg,
-                    &all_stores_arg,
-                    &enable_aliases_arg,
-                    &allow_alias_reuse_arg,
-                    &update_properties_arg,
-                    &test_mode_arg
-                ])
+                .about("Set script settings and properties")
+                .subcommand(
+                    Command::new("settings")
+                       .about("Configure settings") 
+                       .args([
+                            &steam_store_arg,
+                            &gog_store_arg,
+                            &microsoft_store_arg,
+                            &all_stores_arg,
+                            &enable_aliases_arg,
+                            &allow_alias_reuse_arg,
+                       ])
+                )
+                .subcommand(
+                    Command::new("properties")
+                        .about("Configure properties")
+                        .args([
+                            &update_properties_via_env_arg,
+                            &test_mode_arg
+                        ])
+                )
         )
         .subcommand(
             Command::new("add")
@@ -349,60 +359,68 @@ async fn main(){
 
     match cmd.subcommand() {
         Some(("config", config_args)) => {
-            // Parameters
-            let enable_aliases = config_args.value_source("enable_aliases");
-            let allow_alias_reuse = config_args.value_source("allow_alias_reuse");
-            let update_properties = config_args.value_source("update_properties").unwrap();
+            match config_args.subcommand(){
+                Some(("settings", settings_args)) => {
+                    // Parameters
+                    let enable_aliases = settings_args.value_source("enable_aliases");
+                    let allow_alias_reuse = settings_args.value_source("allow_alias_reuse");
 
-            // Update properties
-            if update_properties == ValueSource::CommandLine { properties::update_properties(); }
-            else if update_properties == ValueSource::DefaultValue {
-                match config_args.value_source("test_mode") {
-                    Some(test_mode)  => {
-                        if test_mode == ValueSource::CommandLine {
-                            let test_state: i32 = config_args.get_one::<i32>("test_mode").unwrap().clone();
-                            if test_state == 1 { properties::set_test_mode(true); } else { properties::set_test_mode(false); }
-                            println!("Test mode set to {}", test_state);
+                    // Stores
+                    let search_steam = settings_args.value_source("steam").unwrap();
+                    let search_gog = settings_args.value_source("gog").unwrap();
+                    let search_microsoft_store = settings_args.value_source("microsoft_store").unwrap();
+                    let search_all = settings_args.value_source("all_stores").unwrap();
+
+                    let mut selected : Vec<String> = Vec::new();
+                    if search_steam == ValueSource::CommandLine { selected.push(STEAM_STORE_ID.to_string()); }
+                    if search_gog == ValueSource::CommandLine { selected.push(GOG_STORE_ID.to_string()); }
+                    if search_microsoft_store == ValueSource::CommandLine { selected.push(MICROSOFT_STORE_ID.to_string()); }
+                    if search_all == ValueSource::CommandLine { selected = settings::get_available_stores(); }
+                    if selected.len() > 0 { settings::update_selected_stores(selected); }
+
+                    // If alias state is used
+                    match enable_aliases {
+                        Some(val_src) => {
+                            if val_src == ValueSource::CommandLine {
+                                let alias_state : i32 = settings_args.get_one::<i32>("enable_aliases").unwrap().clone();
+                                if alias_state == 0 || alias_state == 1{ settings::update_alias_state(alias_state); }
+                                else { panic!("enable_aliases must be set to 0 or 1 not \'{}\'", alias_state); }
+                            }
+                        },
+                        None => ()
+                    }
+                    // If allow alias reuse is used
+                    match allow_alias_reuse {
+                        Some(val_src) => {
+                            if val_src == ValueSource::CommandLine {
+                                let alias_state : i32 = settings_args.get_one::<i32>("allow_alias_reuse").unwrap().clone();
+                                if alias_state == 0 || alias_state == 1{ settings::update_alias_reuse_state(alias_state); }
+                                else { panic!("allow_alias_reuse must be set to 0 or 1 not \'{}\'", alias_state); }
+                            }
+                        },
+                        None => ()
+                    }
+                },
+                Some(("properties", properties_args)) => {
+                    // Parameters
+                    let update_properties = properties_args.value_source("update_properties_via_env").unwrap();
+
+                    // Update properties
+                    if update_properties == ValueSource::CommandLine { properties::update_properties(); }
+                    else if update_properties == ValueSource::DefaultValue {
+                        match properties_args.value_source("test_mode") {
+                            Some(test_mode)  => {
+                                if test_mode == ValueSource::CommandLine {
+                                    let test_state: i32 = properties_args.get_one::<i32>("test_mode").unwrap().clone();
+                                    if test_state == 1 { properties::set_test_mode(true); } else { properties::set_test_mode(false); }
+                                    println!("Test mode set to {}", test_state);
+                                }
+                            },
+                            None => ()
                         }
-                    },
-                    None => ()
+                    }
                 }
-            }
-
-            // Stores
-            let search_steam = config_args.value_source("steam").unwrap();
-            let search_gog = config_args.value_source("gog").unwrap();
-            let search_microsoft_store = config_args.value_source("microsoft_store").unwrap();
-            let search_all = config_args.value_source("all_stores").unwrap();
-
-            let mut selected : Vec<String> = Vec::new();
-            if search_steam == ValueSource::CommandLine { selected.push(STEAM_STORE_ID.to_string()); }
-            if search_gog == ValueSource::CommandLine { selected.push(GOG_STORE_ID.to_string()); }
-            if search_microsoft_store == ValueSource::CommandLine { selected.push(MICROSOFT_STORE_ID.to_string()); }
-            if search_all == ValueSource::CommandLine { selected = settings::get_available_stores(); }
-            if selected.len() > 0 { settings::update_selected_stores(selected); }
-
-            // If alias state is used
-            match enable_aliases {
-                Some(val_src) => {
-                    if val_src == ValueSource::CommandLine {
-                        let alias_state : i32 = config_args.get_one::<i32>("enable_aliases").unwrap().clone();
-                        if alias_state == 0 || alias_state == 1{ settings::update_alias_state(alias_state); }
-                        else { panic!("enable_aliases must be set to 0 or 1 not \'{}\'", alias_state); }
-                    }
-                },
-                None => ()
-            }
-            // If allow alias reuse is used
-            match allow_alias_reuse {
-                Some(val_src) => {
-                    if val_src == ValueSource::CommandLine {
-                        let alias_state : i32 = config_args.get_one::<i32>("allow_alias_reuse").unwrap().clone();
-                        if alias_state == 0 || alias_state == 1{ settings::update_alias_reuse_state(alias_state); }
-                        else { panic!("allow_alias_reuse must be set to 0 or 1 not \'{}\'", alias_state); }
-                    }
-                },
-                None => ()
+                _ => ()
             }
         },
         Some(("add", add_args)) => {

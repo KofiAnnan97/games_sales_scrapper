@@ -6,6 +6,10 @@
   - [X] Turn properties file into a crate
     - [X] Add env vars to properties.json
     - [X] Write encrypt and decrypt function for secrets/passwords
+  - [X] Turn properties and settings in subcommands for config cmd
+    - [X] Setup separate config folder for settings and properties data
+  - [ ] Allow for properties to be created/updated without .env file 
+  - [ ] Add visual reminder if test mode is enabled
 - Bugs/Fixes
   - [X] Fix GOG discount percentage (manually calculate)
   - [X] Fixed thresholds with same alias to support update and remove command
@@ -25,12 +29,15 @@
   - Implement option for Steam search without cache (cycle through games and display list of matching titles)
   - Retrieve pricing data from Steam bundles 
   - Retrieve pricing data from game editions on GOG
+  - Add the option to send emails through AWS SES
 - Bugs/Fixes
   - Configure Steam API call to not send steam key as plain text
   - Update dependencies and resolve any potential issues
 - Testing
   - Scope of untested code
-    - `add` and `bulk-insert` script cmds
-    - `update-cache` and `send-email` script cmds (not plans for implementation)
-    - properties - creation, updating and retrieval
-    - retrieving environment variables
+    - Needs implementation
+      - `add` and `bulk-insert` script cmds
+      - properties (creation, updating and retrieval)
+      - retrieving environment variables
+    - No plans for implementation
+      - `update-cache` and `send-email` script cmds

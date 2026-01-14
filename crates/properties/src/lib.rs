@@ -6,7 +6,7 @@ use file_types::common;
 pub mod env_vars;
 pub mod passwords;
 mod constants;
-use constants::{DATA_DIR, PROPERTIES_FILENAME, PROJECT_PATH_ENV, ENV_FILENAME,
+use constants::{DATA_DIR, CONFIG_DIR, PROPERTIES_FILENAME, PROJECT_PATH_ENV, ENV_FILENAME,
                 STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
                 SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, PROP_STEAM_API_KEY,
                 PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, PROP_SMTP_PORT, PROP_SMTP_EMAIL,
@@ -15,7 +15,7 @@ use constants::{DATA_DIR, PROPERTIES_FILENAME, PROJECT_PATH_ENV, ENV_FILENAME,
 
 pub fn get_properties_path() -> String{
     let project_path = env_vars::get_project_path();
-    let mut path_buf: PathBuf = [&project_path, DATA_DIR].iter().collect();
+    let mut path_buf: PathBuf = [&project_path, CONFIG_DIR].iter().collect();
     let data_path = path_buf.display().to_string();
     if !Path::new(&data_path).is_dir() { let _ = fs::create_dir(&data_path); }
     path_buf = [data_path, PROPERTIES_FILENAME.to_string()].iter().collect();
@@ -229,4 +229,12 @@ pub fn get_data_path() -> String {
     //println!("Path: {}", data_path);
     if !Path::new(&data_path).is_dir() { let _ = fs::create_dir(&data_path); }
     data_path
+}
+
+pub fn get_config_path() -> String {
+    let mut config_path = if is_testing_enabled() { env_vars::get_test_path() } else { get_project_path() };
+    let path: PathBuf = [&config_path, CONFIG_DIR].iter().collect();
+    config_path = path.display().to_string();
+    if !Path::new(&config_path).is_dir() { let _ = fs::create_dir(&config_path); }
+    config_path
 }

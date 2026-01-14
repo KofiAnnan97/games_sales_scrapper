@@ -1,22 +1,28 @@
 # Game Sales Scrapper
-![GitHub Release](https://img.shields.io/github/v/release/KofiAnnan97/game_sales_scrapper?label=Latest%20Version) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/KofiAnnan97/game_sales_scrapper/build.yml?label=Build) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/KofiAnnan97/game_sales_scrapper/tests.yml?label=Tests) ![GitHub last commit](https://img.shields.io/github/last-commit/KofiAnnan97/game_sales_scrapper?label=Last%20Commit)
+![GitHub Release](https://img.shields.io/github/v/release/KofiAnnan97/game_sales_scrapper?label=Latest%20Release&color=blue&link=https://github.com/KofiAnnan97/game_sales_scrapper/releases) 
+![GitHub Relase Date](https://img.shields.io/github/release-date/KofiAnnan97/game_sales_scrapper?label=Release%20Date&color=teal) 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/KofiAnnan97/game_sales_scrapper/build.yml?label=Builds) 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/KofiAnnan97/game_sales_scrapper/tests.yml?label=Tests) 
 
 Roadmap: [[link](./Roadmap.md)]
 
-A script that checks multiple storefront to determine if a game has reached a user-defined price. Automation can be set 
-up to send an email if any game is at or falls below their respective price threshold.
+A script that checks multiple storefront to determine if a game has reached a user-defined price. Automation can be set up to send an email if any game is 
+at or falls below their respective price threshold.
 
 ### Supported Storefronts
 - **Steam**
 - **Good Old Games (GOG)**
 - **Microsoft Store (PC)**
 
-### Resources
-- Requesting a STEAM API key := https://steamcommunity.com/dev
+### Dependencies
+- Steam Web API key := https://steamcommunity.com/dev
+- For self-hosting:
+    - SMTP server
+    - Domain
 
 ## Quick Start
 1. Setup SMTP server/service (TLS required)
-2. Nagivate to project folder and run `cargo build --release`
+2. Navigate to project folder and run `cargo build --release`
 3. In the project folder, create `.env` with the following:
     ```
     STEAM_API_KEY={your_steam_api_key}
@@ -36,7 +42,7 @@ up to send an email if any game is at or falls below their respective price thre
     - **For Unix-based systems:** Update *SCHEDULE* variable to desired execution frequency and run `set_cron.sh -c "create"` with root privileges.
     - **For Windows systems:** Update *$trigger* variable to desired execution frequency and run `set_task_scheduler.ps1 -Cmd "create"`. 
     
-        If Powershell scripts execution is not enabled run the following with administrative privileges: 
+        If PowerShell scripts execution is not enabled run the following with administrative privileges: 
         ```
         Set-ExecutionPolicy RemoteSigned
         ```
@@ -62,7 +68,7 @@ Use the`--help` flag in command line to get more information on the supported co
     game_sales_scrapper bulk-insert --file <file.csv>
     ```
     CSV Example:
-    ```text
+    ```
     games, price
     Hollow Knight, 9.99
     Cyberpunk 2077, 19.99

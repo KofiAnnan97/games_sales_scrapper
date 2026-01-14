@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use file_types::common;
 use properties;
 
-static CONFIG_FILENAME : &str = "config.json";
+static CONFIG_FILENAME : &str = "settings.json";
 static ENABLED_STATE : i32 = 1;
 static DISABLED_STATE : i32 = 0;
 
@@ -52,7 +52,7 @@ pub fn get_proper_store_name(id: &str) -> Option<String> {
 }
 
 fn get_path() -> String{
-    let path_buf: PathBuf = [properties::get_data_path(), CONFIG_FILENAME.to_string()].iter().collect();
+    let path_buf: PathBuf = [properties::get_config_path(), CONFIG_FILENAME.to_string()].iter().collect();
     let config_path = path_buf.display().to_string();
     let path_str = common::get_path(&config_path);  //Creates file if it does not exist already
     match metadata(&path_str){
