@@ -6,7 +6,7 @@ use dotenvy::dotenv as dotenv_windows;
 use serde_json::{json, Result, Value};
 use properties;
 use file_types::common;
-use structs::data::GameThreshold;
+use structs::internal::data::GameThreshold;
 use file_ops::thresholds::{ALIAS_MAP, THRESHOLDS};
 use file_ops::settings::{ALIASES_ENABLED, ALLOW_ALIAS_REUSE_AFTER_CREATION, SELECTED_STORES};
 

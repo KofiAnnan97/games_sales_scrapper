@@ -4,14 +4,14 @@ use clap::{arg, command, Arg, ArgAction, Command, ArgMatches};
 use clap::parser::ValueSource;
 
 // Internal libraries
-use stores::{steam, gog, microsoft_store};
+use stores::pc::{steam, gog, microsoft_store};
 use alerting::email;
 use file_types::csv;
 use properties;
 use file_ops::{settings::{self, GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID}, thresholds};
-use structs::data::{SaleInfo, SimpleGameThreshold};
-use structs::gog::GameInfo as GOGGameInfo;
-use structs::microsoft_store::ProductInfo;
+use structs::internal::data::{SaleInfo, SimpleGameThreshold};
+use structs::response::gog::GameInfo as GOGGameInfo;
+use structs::response::microsoft_store::ProductInfo;
 
 fn storefront_check() -> Vec<String> {
     let selected_stores = settings::get_selected_stores();
@@ -253,10 +253,6 @@ async fn main(){
         .action(ArgAction::Set)
         .value_parser(clap::value_parser!(i32))
         .required(false);
-    let update_properties_via_env_arg = arg!(-p --update_properties_via_env "Update properties using env file")
-        .action(ArgAction::SetTrue)
-        .conflicts_with("test_mode")
-        .required(false);
     let test_mode_arg = arg!(-z --test_mode "Flag for saving data using the TEST_PATH env variable")
         .action(ArgAction::Set)
         .value_parser(clap::value_parser!(i32))
@@ -283,10 +279,70 @@ async fn main(){
                 .subcommand(
                     Command::new("properties")
                         .about("Configure properties")
-                        .args([
-                            &update_properties_via_env_arg,
-                            &test_mode_arg
-                        ])
+                        .arg(
+                            Arg::new("from_env") 
+                                .short('f')
+                                .long("from-env")
+                                .action(ArgAction::SetTrue)
+                                .conflicts_with_all(["test_mode", "smtp","recipient", "api_key", "project_path", "test_path", "list_properties"])
+                                .required(false)
+                                .help("Set/update properties from .env file")                      
+                        )
+                        .arg(
+                            Arg::new("smtp") 
+                                .short('s')
+                                .long("smtp")
+                                .action(ArgAction::SetTrue)
+                                .conflicts_with_all(["test_mode"])
+                                .required(false)
+                                .help("Set SMTP properties in properties")                      
+                        )
+                        .arg(
+                            Arg::new("recipient") 
+                                .short('r')
+                                .long("recipient")
+                                .action(ArgAction::Set)
+                                .conflicts_with_all(["test_mode"])
+                                .required(false)
+                                .help("Set recipient email in properties")                      
+                        )
+                        .arg(
+                            Arg::new("api_key") 
+                                .short('a')
+                                .long("api-key")
+                                .action(ArgAction::Set)
+                                .conflicts_with_all(["test_mode"])
+                                .required(false)
+                                .help("Set Steam API key in properties")                      
+                        )
+                        .arg(
+                            Arg::new("project_path") 
+                                .short('p')
+                                .long("project-path")
+                                .action(ArgAction::Set)
+                                .conflicts_with_all(["test_mode"])
+                                .required(false)
+                                .help("Set project path in properties")                      
+                        )
+                        .arg(
+                            Arg::new("test_path") 
+                                .short('t')
+                                .long("test-path")
+                                .action(ArgAction::Set)
+                                .conflicts_with_all(["test_mode"])
+                                .required(false)
+                                .help("Set test path in properties")                      
+                        )
+                        .arg(
+                            Arg::new("list_properties") 
+                                .short('l')
+                                .long("list-properties")
+                                .action(ArgAction::SetTrue)
+                                .conflicts_with_all(["test_mode", "from_env", "smtp","recipient", "api_key", "project_path", "test_path"])
+                                .required(false)
+                                .help("List properties")                      
+                        )
+                        .arg(&test_mode_arg)
                 )
         )
         .subcommand(
@@ -403,11 +459,11 @@ async fn main(){
                 },
                 Some(("properties", properties_args)) => {
                     // Parameters
-                    let update_properties = properties_args.value_source("update_properties_via_env").unwrap();
+                    let from_env = properties_args.value_source("from_env").unwrap();
 
-                    // Update properties
-                    if update_properties == ValueSource::CommandLine { properties::update_properties(); }
-                    else if update_properties == ValueSource::DefaultValue {
+                    // Update properties from env
+                    if from_env == ValueSource::CommandLine { properties::update_properties(); }
+                    else if from_env == ValueSource::DefaultValue {
                         match properties_args.value_source("test_mode") {
                             Some(test_mode)  => {
                                 if test_mode == ValueSource::CommandLine {

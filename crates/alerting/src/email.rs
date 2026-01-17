@@ -2,7 +2,7 @@ use lettre::{Message, SmtpTransport, Transport};
 use lettre::message::{MultiPart, SinglePart};
 use lettre::transport::smtp::authentication::{Credentials, Mechanism};
 
-use structs::data::SaleInfo;
+use structs::internal::data::SaleInfo;
 use properties;
 
 pub fn send_plain_text_msg(recipient: &str, subject: &str, body: &str) {

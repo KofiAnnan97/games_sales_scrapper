@@ -1,5 +1,5 @@
 #[cfg(test)]
-use stores::microsoft_store;
+use stores::pc::microsoft_store;
 
 // Constants
 static GAME_TITLE: &str = "SILENT HILL f";

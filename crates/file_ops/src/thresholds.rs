@@ -6,11 +6,11 @@ use std::fs::{metadata, read_to_string};
 
 use file_types::common;
 use crate::settings::{self, get_alias_reuse_state, ALLOW_ALIAS_REUSE_AFTER_CREATION};
-use stores::steam; //, gog, microsoft_store};
-use structs::steam::App;
-use structs::gog::GameInfo as GOGGameInfo;
-use structs::microsoft_store::ProductInfo;
-use structs::data::GameThreshold;
+use stores::pc::steam; //, gog, microsoft_store};
+use structs::response::steam::App;
+use structs::response::gog::GameInfo as GOGGameInfo;
+use structs::response::microsoft_store::ProductInfo;
+use structs::internal::data::GameThreshold;
 use properties;
 
 static THRESHOLD_FILENAME : &str = "thresholds.json";

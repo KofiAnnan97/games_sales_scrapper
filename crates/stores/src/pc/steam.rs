@@ -6,8 +6,8 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use file_types::common;
 use properties;
-use structs::data::SaleInfo;
-use structs::steam::{App, PriceOverview};
+use structs::internal::data::SaleInfo;
+use structs::response::steam::{App, PriceOverview};
 
 static CACHE_FILENAME : &str = "cached_steam_games.json";
 

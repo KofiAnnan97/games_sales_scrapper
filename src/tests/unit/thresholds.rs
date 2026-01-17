@@ -3,10 +3,10 @@ use file_types::common;
 use properties;
 use file_ops::settings::{GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID};
 use file_ops::thresholds::update_thresholds;
-use structs::data::GameThreshold;
-use structs::steam::App;
-use structs::gog::{BaseMoney, FinalMoney, GameInfo as GOGGame, GameInfoBuilder as GOGGameBuilder, Price};
-use structs::microsoft_store::{PriceInfo, ProductInfo as MSGame, ProductInfoBuilder as MSGameBuilder};
+use structs::internal::data::GameThreshold;
+use structs::response::steam::App;
+use structs::response::gog::{BaseMoney, FinalMoney, GameInfo as GOGGame, GameInfoBuilder as GOGGameBuilder, Price};
+use structs::response::microsoft_store::{PriceInfo, ProductInfo as MSGame, ProductInfoBuilder as MSGameBuilder};
 use crate::tests::helper;
 
 fn delete_thresholds() {

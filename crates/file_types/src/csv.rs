@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::{error::Error};
 
-use structs::data::SimpleGameThreshold;
+use structs::internal::data::SimpleGameThreshold;
 use crate::common;
 
 pub fn parse_game_prices(file_path: &str) -> Result<Vec<SimpleGameThreshold>, Box<dyn Error>>{

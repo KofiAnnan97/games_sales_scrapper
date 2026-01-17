@@ -1,8 +1,8 @@
 use serde_json::{Result, Value, Error};
 use std::f64;
 
-use structs::data::{SaleInfo};
-use structs::gog::{Game, PriceOverview, GameInfo};
+use structs::internal::data::{SaleInfo};
+use structs::response::gog::{Game, PriceOverview, GameInfo};
 
 pub static VERSION: u32 = 2;
 

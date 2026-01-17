@@ -1,5 +1,5 @@
 #[cfg(test)]
-use stores::gog;
+use stores::pc::gog;
 
 // Constants
 static GAME_TITLE: &str = "SILENT HILL f";
