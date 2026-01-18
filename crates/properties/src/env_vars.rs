@@ -7,10 +7,11 @@ use rand::distr::{Alphanumeric, SampleString};
 
 use file_types::common;
 use crate::passwords;
-use crate::constants::{CONFIG_DIR, DECRYPT_FILENAME, ENV_FILENAME, STEAM_API_KEY_ENV, 
-                       RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
-                       SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, 
-                       PROJECT_PATH_ENV, TEST_PATH_ENV};
+use constants::properties::location::{CONFIG_DIR, DECRYPT_FILENAME, ENV_FILENAME};
+use constants::properties::variables::{STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, 
+                                       SMTP_HOST_ENV, SMTP_PORT_ENV,SMTP_EMAIL_ENV, 
+                                       SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, 
+                                       PROJECT_PATH_ENV, TEST_PATH_ENV};
 
 pub fn get_decrypt_key() -> String{
     let mut path_buf: PathBuf = [get_project_path().as_str(), CONFIG_DIR].iter().collect();
@@ -38,7 +39,6 @@ pub fn get_variables() -> HashMap<String, String> {
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
 
-    let mut vars: HashMap<String, String> = HashMap::new();
     let mut env_path = std::env::current_dir().unwrap();
     env_path.push(ENV_FILENAME);
     if env_path.is_file() {
@@ -53,7 +53,8 @@ pub fn get_variables() -> HashMap<String, String> {
         let smtp_pwd_encrypted = passwords::encrypt(get_decrypt_key().as_str(), smtp_pwd_plain);
         let cwd = std::env::current_dir().unwrap().display().to_string();
         let project_path = std::env::var(PROJECT_PATH_ENV).unwrap_or_else(|_| cwd);
-        vars = HashMap::from([
+        
+        let vars: HashMap<String, String> = HashMap::from([
             (STEAM_API_KEY_ENV.to_string(), steam_key_encrypted),
             (RECIPIENT_EMAIL_ENV.to_string(), recipient),
             (SMTP_HOST_ENV.to_string(), smtp_host),
@@ -63,8 +64,10 @@ pub fn get_variables() -> HashMap<String, String> {
             (SMTP_PASSWORD_ENV.to_string(), smtp_pwd_encrypted),
             (PROJECT_PATH_ENV.to_string(), project_path),
         ]);
+        vars
+    } else {
+        panic!("No environment variables found. Missing file: '{}'.", ENV_FILENAME);
     }
-    vars
 }
 
 pub fn get_project_path() -> String {

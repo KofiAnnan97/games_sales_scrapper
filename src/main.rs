@@ -1,9 +1,15 @@
+use std::collections::HashMap;
 use std::io::Write;
 use std::io;
 use clap::{arg, command, Arg, ArgAction, Command, ArgMatches};
 use clap::parser::ValueSource;
+use serde_json::Value;
 
 // Internal libraries
+use constants::properties::variables::{PROP_PROJECT_PATH, PROP_RECIPIENT_EMAIL, PROP_SMTP_EMAIL, PROP_SMTP_HOST, 
+                                       PROP_SMTP_PORT, PROP_SMTP_USERNAME, PROP_TEST_MODE};
+use constants::cli::args::*;
+
 use stores::pc::{steam, gog, microsoft_store};
 use alerting::email;
 use file_types::csv;
@@ -232,32 +238,6 @@ async fn main(){
         .action(ArgAction::Set)
         .value_parser(clap::value_parser!(String))
         .required(true);
-    let steam_store_arg = arg!(-s --steam "Search Steam Store")
-        .action(ArgAction::SetTrue)
-        .required(false);
-    let gog_store_arg = arg!(-g --gog "Search Good Old Games (GOG) Store")
-        .action(ArgAction::SetTrue)
-        .required(false);
-    let microsoft_store_arg =  arg!(-m --microsoft_store "Search Microsoft Store")
-        .action(ArgAction::SetTrue)
-        .required(false);
-    let all_stores_arg = arg!(-a --all_stores "Search all game stores")
-        .action(ArgAction::SetTrue)
-        .conflicts_with_all(["steam", "gog", "microsoft_store"])
-        .required(false);
-    let enable_aliases_arg = arg!(-e --enable_aliases "Enable aliases for game titles (Possible options: [0,1])")
-        .action(ArgAction::Set)
-        .value_parser(clap::value_parser!(i32))
-        .required(false);
-    let allow_alias_reuse_arg = arg!(-r --allow_alias_reuse "Enable alias reuse after initial creation (Possible options: [0,1])")
-        .action(ArgAction::Set)
-        .value_parser(clap::value_parser!(i32))
-        .required(false);
-    let test_mode_arg = arg!(-z --test_mode "Flag for saving data using the TEST_PATH env variable")
-        .action(ArgAction::Set)
-        .value_parser(clap::value_parser!(i32))
-        .hide(true)
-        .required(false);
 
     let cmd : ArgMatches = command!()
         .about("A simple script for checking prices on games.")
@@ -267,82 +247,116 @@ async fn main(){
                 .subcommand(
                     Command::new("settings")
                        .about("Configure settings") 
-                       .args([
-                            &steam_store_arg,
-                            &gog_store_arg,
-                            &microsoft_store_arg,
-                            &all_stores_arg,
-                            &enable_aliases_arg,
-                            &allow_alias_reuse_arg,
-                       ])
+                       .arg(
+                            arg!(-s --steam "Search Steam Store")
+                                .action(ArgAction::SetTrue)
+                                .required(false)
+                        )
+                        .arg(
+                            arg!(-g --gog "Search Good Old Games (GOG) Store")
+                                .action(ArgAction::SetTrue)
+                                .required(false)
+                        )
+                        .arg(
+                            arg!(-m --microsoft_store "Search Microsoft Store")
+                                .action(ArgAction::SetTrue)
+                                .required(false)
+                        )
+                        .arg(
+                            arg!(-a --all_stores "Search all game stores")
+                                .action(ArgAction::SetTrue)
+                                .conflicts_with_all(["steam", "gog", "microsoft_store"])
+                                .required(false)
+                        )
+                        .arg(
+                            arg!(-e --enable_aliases "Enable aliases for game titles (Possible options: [0,1])")
+                                .action(ArgAction::Set)
+                                .value_parser(clap::value_parser!(i32))
+                                .required(false)
+                        )
+                        .arg(
+                            arg!(-r --allow_alias_reuse "Enable alias reuse after initial creation (Possible options: [0,1])")
+                                .action(ArgAction::Set)
+                                .value_parser(clap::value_parser!(i32))
+                                .required(false)
+                        )
+                       
                 )
                 .subcommand(
                     Command::new("properties")
                         .about("Configure properties")
                         .arg(
-                            Arg::new("from_env") 
+                            Arg::new(FROM_ENV) 
                                 .short('f')
-                                .long("from-env")
+                                .long(FROM_ENV)
                                 .action(ArgAction::SetTrue)
-                                .conflicts_with_all(["test_mode", "smtp","recipient", "api_key", "project_path", "test_path", "list_properties"])
+                                .conflicts_with_all(["test_mode", SET_SMTP, SET_RECIPIENT, SET_API_KEY, 
+                                                     SET_PROJECT_PATH, SET_TEST_PATH, LIST_PROPERTIES])
                                 .required(false)
                                 .help("Set/update properties from .env file")                      
                         )
                         .arg(
-                            Arg::new("smtp") 
+                            Arg::new(SET_SMTP) 
                                 .short('s')
-                                .long("smtp")
+                                .long(SET_SMTP)
                                 .action(ArgAction::SetTrue)
                                 .conflicts_with_all(["test_mode"])
                                 .required(false)
                                 .help("Set SMTP properties in properties")                      
                         )
                         .arg(
-                            Arg::new("recipient") 
+                            Arg::new(SET_RECIPIENT) 
                                 .short('r')
-                                .long("recipient")
+                                .long(SET_RECIPIENT)
                                 .action(ArgAction::Set)
                                 .conflicts_with_all(["test_mode"])
                                 .required(false)
                                 .help("Set recipient email in properties")                      
                         )
                         .arg(
-                            Arg::new("api_key") 
+                            Arg::new(SET_API_KEY) 
                                 .short('a')
-                                .long("api-key")
+                                .long(SET_API_KEY)
                                 .action(ArgAction::Set)
                                 .conflicts_with_all(["test_mode"])
                                 .required(false)
                                 .help("Set Steam API key in properties")                      
                         )
                         .arg(
-                            Arg::new("project_path") 
+                            Arg::new(SET_PROJECT_PATH) 
                                 .short('p')
-                                .long("project-path")
+                                .long(SET_PROJECT_PATH)
                                 .action(ArgAction::Set)
                                 .conflicts_with_all(["test_mode"])
                                 .required(false)
                                 .help("Set project path in properties")                      
                         )
                         .arg(
-                            Arg::new("test_path") 
+                            Arg::new(SET_TEST_PATH) 
                                 .short('t')
-                                .long("test-path")
+                                .long(SET_TEST_PATH)
                                 .action(ArgAction::Set)
                                 .conflicts_with_all(["test_mode"])
                                 .required(false)
                                 .help("Set test path in properties")                      
                         )
                         .arg(
-                            Arg::new("list_properties") 
+                            Arg::new(LIST_PROPERTIES) 
                                 .short('l')
-                                .long("list-properties")
+                                .long(LIST_PROPERTIES)
                                 .action(ArgAction::SetTrue)
-                                .conflicts_with_all(["test_mode", "from_env", "smtp","recipient", "api_key", "project_path", "test_path"])
+                                .conflicts_with_all(["test_mode", FROM_ENV, SET_SMTP, SET_RECIPIENT, 
+                                                     SET_API_KEY, SET_PROJECT_PATH, SET_TEST_PATH])
                                 .required(false)
                                 .help("List properties")                      
                         )
-                        .arg(&test_mode_arg)
+                        .arg(
+                            arg!(-z --test_mode "Flag for saving data using the TEST_PATH env variable")
+                                .action(ArgAction::Set)
+                                .value_parser(clap::value_parser!(i32))
+                                .hide(true)
+                                .required(false)
+                        )
                 )
         )
         .subcommand(
@@ -366,48 +380,48 @@ async fn main(){
                 .args([&title_arg])
         )
         .arg(
-            Arg::new("selected-stores")
+            Arg::new(LIST_SELECTED_STORES)
                 .short('l')
-                .long("list-selected-stores")
+                .long(LIST_SELECTED_STORES)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all([ "thresholds", "cache", "email", "check-prices"])
+                .conflicts_with_all([LIST_THRESHOLDS, UPDATE_CACHE, SEND_EMAIL, CHECK_PRICES])
                 .required(false)
                 .help("Display the selected storefronts")
         )
         .arg(
-            Arg::new("thresholds")
+            Arg::new(LIST_THRESHOLDS)
                 .short('t')
-                .long("list-thresholds")
+                .long(LIST_THRESHOLDS)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all(["cache", "email", "selected-stores", "check-prices"])
+                .conflicts_with_all([UPDATE_CACHE, SEND_EMAIL, LIST_SELECTED_STORES, CHECK_PRICES])
                 .required(false)
                 .help("List all game price thresholds")
         )
         .arg(
-            Arg::new("cache")
+            Arg::new(UPDATE_CACHE)
                 .short('c')
-                .long("update-cache")
+                .long(UPDATE_CACHE)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all(["thresholds", "email", "selected-stores", "check-prices"])
+                .conflicts_with_all([LIST_THRESHOLDS, SEND_EMAIL, LIST_SELECTED_STORES, CHECK_PRICES])
                 .required(false)
                 .help("Updated cached list of games")
         )
         .arg(
-            Arg::new("check-prices")
+            Arg::new(CHECK_PRICES)
                 .short('p')
-                .long("check-prices")
+                .long(CHECK_PRICES)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all(["thresholds", "cache", "selected-stores", "email"])
+                .conflicts_with_all([LIST_THRESHOLDS, UPDATE_CACHE, LIST_SELECTED_STORES, SEND_EMAIL])
                 .required(false)
                 .help("Print out which games are on sale")
         )
         .arg(
-            Arg::new("email")
+            Arg::new(SEND_EMAIL)
                 .short('e')
-                .long("send-email")
+                .long(SEND_EMAIL)
                 .exclusive(true)
                 .action(ArgAction::SetTrue)
-                .conflicts_with_all(["thresholds", "cache", "selected-stores", "check-prices"])
+                .conflicts_with_all([LIST_THRESHOLDS, UPDATE_CACHE, LIST_SELECTED_STORES, CHECK_PRICES])
                 .required(false)
                 .help("Send email if game(s) are below price threshold")
         )
@@ -458,11 +472,9 @@ async fn main(){
                     }
                 },
                 Some(("properties", properties_args)) => {
-                    // Parameters
-                    let from_env = properties_args.value_source("from_env").unwrap();
-
                     // Update properties from env
-                    if from_env == ValueSource::CommandLine { properties::update_properties(); }
+                    let from_env = properties_args.value_source(FROM_ENV).unwrap();
+                    if from_env == ValueSource::CommandLine { properties::update_all_properties(); }
                     else if from_env == ValueSource::DefaultValue {
                         match properties_args.value_source("test_mode") {
                             Some(test_mode)  => {
@@ -473,6 +485,109 @@ async fn main(){
                                 }
                             },
                             None => ()
+                        }
+                    }
+                    
+                    // Set SMTP variables
+                    match properties_args.value_source(SET_SMTP){
+                        Some(val_src) => {
+                            if val_src == ValueSource::CommandLine{
+                                let mut host = String::new();
+                                print!("SMTP Hostname: ");
+                                let _ = io::stdout().flush();
+                                io::stdin()
+                                    .read_line(&mut host)
+                                    .expect("Failed to read user input");
+                                host = host[0..host.len()-1].to_string();
+                                let mut port_str = String::new();
+                                print!("SMTP Port: ");
+                                let _ = io::stdout().flush();
+                                io::stdin()
+                                    .read_line(&mut port_str)
+                                    .expect("Failed to read user input");
+                                let port_num: u16 = (&port_str.trim()).parse::<u16>().expect("Could not convert value to integer");
+                                let mut email = String::new();
+                                print!("SMTP Email: ");
+                                let _ = io::stdout().flush();
+                                io::stdin()
+                                    .read_line(&mut email)
+                                    .expect("Failed to read user input");
+                                email = email[0..email.len()-1].to_string();
+                                let mut user = String::new();
+                                print!("SMTP User: ");
+                                let _ = io::stdout().flush();
+                                io::stdin()
+                                    .read_line(&mut user)
+                                    .expect("Failed to read user input");
+                                user = user[0..user.len()-1].to_string();
+                                let mut pass = String::new();
+                                print!("SMTP Password: ");
+                                let _ = io::stdout().flush();
+                                io::stdin()
+                                    .read_line(&mut pass)
+                                    .expect("Failed to read user input");
+                                pass = pass[0..pass.len()-1].to_string();
+                                properties::set_stmp_vars(host, port_num, email, user, pass);
+                            }
+                        },
+                        None => ()
+                    }
+                
+                    // Set recipient email
+                    match properties_args.get_one::<String>(SET_RECIPIENT){
+                        Some(recipient) => {
+                            let prev_recipient = properties::get_recipient();
+                            if !recipient.is_empty() && prev_recipient != *recipient { 
+                                properties::set_recipient(recipient); 
+                            }
+                        },
+                        None => ()
+                    }
+
+                    // Set Steam api key
+                    match properties_args.get_one::<String>(SET_API_KEY){
+                        Some(key) => {
+                            let prev_key = properties::get_steam_api_key();
+                            if !key.is_empty() && prev_key != *key{
+                                properties::set_steam_api_key(key.to_string());
+                            }
+                        },
+                        None => (),
+                    }
+
+                    // Set project path
+                    match properties_args.get_one::<String>(SET_PROJECT_PATH){
+                        Some(path) => {
+                            let prev_path = properties::get_project_path();
+                            if !path.is_empty() && prev_path != *path {
+                                properties::set_project_path(path);
+                            }
+                        },
+                        None => (),
+                    }
+
+                    // Set test path
+
+
+                    // List properties
+                    let list_properties = properties_args.value_source(LIST_PROPERTIES).unwrap();
+                    if list_properties == ValueSource::CommandLine {
+                        match properties::load_properties(){
+                            Ok(properties) => {
+                                let properties_str = serde_json::to_string(&properties).unwrap();
+                                let lookup: HashMap<String, Value> = serde_json::from_str(&properties_str).unwrap();
+                                println!("PROPERTIES:\n-----------");
+                                println!("Project Path: {}", lookup.get(PROP_PROJECT_PATH).unwrap_or_default());
+                                println!("Recipient Email: {}", lookup.get(PROP_RECIPIENT_EMAIL).unwrap_or_default());
+                                println!("Steam API Key: {}", properties::get_steam_api_key());
+                                println!("SMTP Host: {}", lookup.get(PROP_SMTP_HOST).unwrap_or_default());
+                                println!("SMTP Port: {}", lookup.get(PROP_SMTP_PORT).unwrap_or_default());
+                                println!("SMTP Email: {}", lookup.get(PROP_SMTP_EMAIL).unwrap_or_default());
+                                println!("SMTP User: {}", lookup.get(PROP_SMTP_USERNAME).unwrap_or_default());
+                                println!("SMTP Password: {}", properties::get_smtp_pwd());
+                                println!("Test Mode: {}", lookup.get(PROP_TEST_MODE).unwrap_or_default());
+                            },
+                            Err(e) => eprintln!("Failed to list properties.\n{}", e)
                         }
                     }
                 }
@@ -543,20 +658,20 @@ async fn main(){
         },
         _ => {
             if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
-            if cmd.get_flag("thresholds") { thresholds::list_games(); }
-            else if cmd.get_flag("selected-stores") { settings::list_selected(); }
-            else if cmd.get_flag("cache"){
+            if cmd.get_flag(LIST_THRESHOLDS) { thresholds::list_games(); }
+            else if cmd.get_flag(LIST_SELECTED_STORES) { settings::list_selected(); }
+            else if cmd.get_flag(UPDATE_CACHE){
                 println!("Caching started (this might take a while)...");
                 steam::update_cached_games().await;
             }
-            else if cmd.get_flag("check-prices") {
+            else if cmd.get_flag(CHECK_PRICES) {
                 let use_html = false;
                 let prices_str = check_prices(use_html).await;
                 if !prices_str.is_empty() {
                     println!("------------\nCHECK PRICES\n------------\n{}", prices_str);
                 }
             }
-            else if cmd.get_flag("email"){
+            else if cmd.get_flag(SEND_EMAIL){
                 let use_html = true;
                 let email_str = check_prices(use_html).await;
                 println!("Email Contents:\n{}\n", email_str);

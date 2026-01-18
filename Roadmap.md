@@ -9,7 +9,8 @@
   - [X] Turn properties and settings in subcommands for config cmd
     - [X] Setup separate config folder for settings and properties data
   - [X] Add visual reminder if test mode is enabled
-  - [ ] Allow for properties to be created/updated without .env file 
+  - [X] Allow for properties to be created/updated without .env file
+    - [ ]  Add check to confirm properties are set
 - Bugs/Fixes
   - [X] Fix GOG discount percentage (manually calculate)
   - [X] Fixed thresholds with same alias to support update and remove command
@@ -27,6 +28,7 @@
 - Features/Updates
   - Set up Humble Bundle Storefront & test
   - Implement option for Steam search without cache (cycle through games and display list of matching titles)
+  - Implement script as a desktop app
   - Retrieve pricing data from Steam bundles 
   - Retrieve pricing data from game editions on GOG
   - Add the option to send emails through AWS SES

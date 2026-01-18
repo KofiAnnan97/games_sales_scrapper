@@ -1,0 +1,7 @@
+[package]
+name = "constants"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]

@@ -5,13 +5,15 @@ use serde_json::{json, Value, Result};
 use file_types::common;
 pub mod env_vars;
 pub mod passwords;
-mod constants;
-use constants::{DATA_DIR, CONFIG_DIR, PROPERTIES_FILENAME, PROJECT_PATH_ENV, ENV_FILENAME,
-                STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, SMTP_PORT_ENV,
-                SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, PROP_STEAM_API_KEY,
-                PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, PROP_SMTP_PORT, PROP_SMTP_EMAIL,
-                PROP_SMTP_USERNAME, PROP_SMTP_PASSWORD, PROP_PROJECT_PATH, PROP_TEST_MODE,
-                PROP_SLIDING_STEAM_APPID};
+use constants::properties::location::{DATA_DIR, CONFIG_DIR, PROPERTIES_FILENAME, ENV_FILENAME};
+use constants::properties::variables::{PROJECT_PATH_ENV, STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, SMTP_HOST_ENV, 
+                                       SMTP_PORT_ENV, SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, 
+                                       PROP_STEAM_API_KEY, PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, PROP_SMTP_PORT, 
+                                       PROP_SMTP_EMAIL, PROP_SMTP_USERNAME, PROP_SMTP_PASSWORD, PROP_PROJECT_PATH, 
+                                       PROP_TEST_MODE, PROP_SLIDING_STEAM_APPID};
+use crate::env_vars::get_decrypt_key;
+
+// Retrieve paths
 
 pub fn get_properties_path() -> String{
     let project_path = env_vars::get_project_path();
@@ -25,17 +27,17 @@ pub fn get_properties_path() -> String{
         Ok(md) => {
             if md.len() == 0 {
                 let vars = env_vars::get_variables();
-                if vars.is_empty() { panic!("No environment variables found. Missing file: \"{}\".", ENV_FILENAME); }
-                let port: u16 = vars.get(SMTP_PORT_ENV).unwrap().parse().unwrap();
+                let mut has_env = true;
+                if vars.is_empty() { has_env = false; }
                 let properties = json!({
-                    PROP_STEAM_API_KEY : vars.get(STEAM_API_KEY_ENV).unwrap(),
-                    PROP_RECIPIENT_EMAIL: vars.get(RECIPIENT_EMAIL_ENV).unwrap(),
-                    PROP_SMTP_HOST: vars.get(SMTP_HOST_ENV).unwrap(),
-                    PROP_SMTP_PORT: port,
-                    PROP_SMTP_EMAIL: vars.get(SMTP_EMAIL_ENV).unwrap(),
-                    PROP_SMTP_USERNAME: vars.get(SMTP_USERNAME_ENV).unwrap(),
-                    PROP_SMTP_PASSWORD: vars.get(SMTP_PASSWORD_ENV).unwrap(),
-                    PROP_PROJECT_PATH: vars.get(PROJECT_PATH_ENV).unwrap(),
+                    PROP_STEAM_API_KEY : if has_env { vars.get(STEAM_API_KEY_ENV).unwrap() } else { "" },
+                    PROP_RECIPIENT_EMAIL: if has_env { vars.get(RECIPIENT_EMAIL_ENV).unwrap() } else { "" },
+                    PROP_SMTP_HOST: if has_env { vars.get(SMTP_HOST_ENV).unwrap() } else { "" },
+                    PROP_SMTP_PORT: if has_env { vars.get(SMTP_PORT_ENV).unwrap().parse::<u16>().unwrap() } else { 0 },
+                    PROP_SMTP_EMAIL: if has_env { vars.get(SMTP_EMAIL_ENV).unwrap() } else { "" },
+                    PROP_SMTP_USERNAME: if has_env { vars.get(SMTP_USERNAME_ENV).unwrap() } else { "" },
+                    PROP_SMTP_PASSWORD: if has_env { vars.get(SMTP_PASSWORD_ENV).unwrap() } else { "" },
+                    PROP_PROJECT_PATH: if has_env { vars.get(PROJECT_PATH_ENV).unwrap() } else { "" },
                     PROP_SLIDING_STEAM_APPID: 0,
                     PROP_TEST_MODE: 0
                 });
@@ -48,7 +50,26 @@ pub fn get_properties_path() -> String{
     path_str
 }
 
-pub fn update_properties() {
+pub fn get_data_path() -> String {
+    let mut data_path = if is_testing_enabled() { env_vars::get_test_path() } else { get_project_path() };
+    let path: PathBuf = [&data_path, DATA_DIR].iter().collect();
+    data_path = path.display().to_string();
+    //println!("Path: {}", data_path);
+    if !Path::new(&data_path).is_dir() { let _ = fs::create_dir(&data_path); }
+    data_path
+}
+
+pub fn get_config_path() -> String {
+    let mut config_path = if is_testing_enabled() { env_vars::get_test_path() } else { get_project_path() };
+    let path: PathBuf = [&config_path, CONFIG_DIR].iter().collect();
+    config_path = path.display().to_string();
+    if !Path::new(&config_path).is_dir() { let _ = fs::create_dir(&config_path); }
+    config_path
+}
+
+// Properties Functions
+
+pub fn update_all_properties() {
     let prev_steam_key = get_steam_api_key();
     let prev_recipient = get_recipient();
     let prev_host = get_smtp_host();
@@ -115,6 +136,8 @@ pub fn load_properties() -> Result<Value> {
     Ok(body)
 }
 
+// Getters
+
 fn get_string_var(var_name: &str) -> String {
     match load_properties() {
         Ok(properties) => {
@@ -151,7 +174,8 @@ fn get_integer_var(var_name: &str) -> i64 {
 
 pub fn get_steam_api_key() -> String {
     let key_str = env_vars::get_decrypt_key();
-    passwords::decrypt(key_str.as_str(), get_string_var(PROP_STEAM_API_KEY))
+    let steam_api_key = get_string_var(PROP_STEAM_API_KEY);
+    if !steam_api_key.is_empty() { passwords::decrypt(key_str.as_str(), steam_api_key) } else { String::new() }
 }
 
 pub fn get_recipient() -> String {
@@ -176,7 +200,8 @@ pub fn get_smtp_user() -> String {
 
 pub fn get_smtp_pwd() -> String {
     let key_str = env_vars::get_decrypt_key();
-    passwords::decrypt(key_str.as_str(), get_string_var(PROP_SMTP_PASSWORD))
+    let smtp_pwd = get_string_var(PROP_SMTP_PASSWORD);
+    if !smtp_pwd.is_empty() { passwords::decrypt(key_str.as_str(), smtp_pwd) } else { String::new() }
 }
 
 pub fn get_project_path() -> String {
@@ -197,6 +222,92 @@ pub fn is_testing_enabled() -> bool {
     if state == 1 { true } else { false }
 }
 
+// Setters
+
+pub fn set_steam_api_key(key_str: String) {
+    match load_properties() {
+        Ok(data) => {
+            let mut properties = data;
+            *properties.get_mut(PROP_STEAM_API_KEY).unwrap() = json!(passwords::encrypt(&get_decrypt_key(), key_str));
+            let properties_str = serde_json::to_string_pretty(&properties);
+            common::write_to_file(get_properties_path(), properties_str.expect("Sliding steam appid property could not be created/updated."));
+        }
+        Err(e) => eprintln!("Error: {}", e)
+    }
+}
+
+pub fn set_recipient(email_str: &str) {
+    match load_properties() {
+        Ok(data) => {
+            let mut properties = data;
+            *properties.get_mut(PROP_RECIPIENT_EMAIL).unwrap() = json!(email_str);
+            let properties_str = serde_json::to_string_pretty(&properties);
+            common::write_to_file(get_properties_path(), properties_str.expect("recipient email property could not be created/updated."));
+        }
+        Err(e) => eprintln!("Error: {}", e)
+    }
+}
+
+pub fn set_stmp_vars(host: String, port: u16, email: String, user: String, pass: String) {
+    match load_properties() {
+        Ok(data) => {
+            let mut properties = data;
+            if !host.is_empty() { *properties.get_mut(PROP_SMTP_HOST).unwrap() = json!(host); }
+            if port != 0 { *properties.get_mut(PROP_SMTP_PORT).unwrap() = json!(port); }
+            if !email.is_empty() { *properties.get_mut(PROP_SMTP_EMAIL).unwrap() = json!(email); }
+            if !user.is_empty() { *properties.get_mut(PROP_SMTP_USERNAME).unwrap() = json!(user); }
+            if !pass.is_empty() { *properties.get_mut(PROP_SMTP_PASSWORD).unwrap() = json!(passwords::encrypt(&get_decrypt_key(), pass)); }
+            let properties_str = serde_json::to_string_pretty(&properties);
+            common::write_to_file(get_properties_path(), properties_str.expect("Refresh steam appid property could not be created."));
+        }
+        Err(e) => eprintln!("Error: {}", e)
+    }
+}
+
+pub fn set_project_path(path: &str) {
+    if !Path::new(&path).is_dir() {
+        eprintln!("Project path was not set because '{}' is not a directory.", path);
+        return;
+    }
+    match load_properties() {
+        Ok(data) => {
+            let mut properties = data;
+            *properties.get_mut(PROP_PROJECT_PATH).unwrap() = json!(path);
+            let properties_str = serde_json::to_string_pretty(&properties);
+            common::write_to_file(get_properties_path(), properties_str.expect("Project path property could not be created/updated."));
+        }
+        Err(e) => eprintln!("Error: {}", e)
+    }
+}
+
+pub fn set_test_path(path: &str) {
+    if !Path::new(&path).is_dir() {
+        eprintln!("Test path was not set because '{}' is not a directory.", path);
+        return;
+    }
+    match load_properties() {
+        Ok(data) => {
+            // let mut properties = data;
+            // *properties.get_mut(PROP_TEST_PATH).unwrap() = json!(path);
+            // let properties_str = serde_json::to_string_pretty(&properties);
+            // common::write_to_file(get_properties_path(), properties_str.expect("Test path property could not be created/updated."));
+        }
+        Err(e) => eprintln!("Error: {}", e)
+    }
+}
+
+pub fn set_sliding_steam_appid(steam_appid: u32) {
+    match load_properties() {
+        Ok(data) => {
+            let mut properties = data;
+            *properties.get_mut(PROP_SLIDING_STEAM_APPID).unwrap() = json!(steam_appid);
+            let properties_str = serde_json::to_string_pretty(&properties);
+            common::write_to_file(get_properties_path(), properties_str.expect("Sliding steam appid property could not be created/updated."));
+        }
+        Err(e) => eprintln!("Error: {}", e)
+    }
+}
+
 pub fn set_test_mode(is_enabled: bool) {
     match load_properties(){
         Ok(data) => {
@@ -208,33 +319,4 @@ pub fn set_test_mode(is_enabled: bool) {
         },
         Err(e) => eprintln!("Error: {}", e)
     }
-}
-
-pub fn set_sliding_steam_appid(steam_appid: u32) {
-    match load_properties() {
-        Ok(data) => {
-            let mut properties = data;
-            *properties.get_mut(PROP_SLIDING_STEAM_APPID).unwrap() = json!(steam_appid);
-            let properties_str = serde_json::to_string_pretty(&properties);
-            common::write_to_file(get_properties_path(), properties_str.expect("Refresh steam appid property could not be created."));
-        }
-        Err(e) => eprintln!("Error: {}", e)
-    }
-}
-
-pub fn get_data_path() -> String {
-    let mut data_path = if is_testing_enabled() { env_vars::get_test_path() } else { get_project_path() };
-    let path: PathBuf = [&data_path, DATA_DIR].iter().collect();
-    data_path = path.display().to_string();
-    //println!("Path: {}", data_path);
-    if !Path::new(&data_path).is_dir() { let _ = fs::create_dir(&data_path); }
-    data_path
-}
-
-pub fn get_config_path() -> String {
-    let mut config_path = if is_testing_enabled() { env_vars::get_test_path() } else { get_project_path() };
-    let path: PathBuf = [&config_path, CONFIG_DIR].iter().collect();
-    config_path = path.display().to_string();
-    if !Path::new(&config_path).is_dir() { let _ = fs::create_dir(&config_path); }
-    config_path
 }

@@ -11,7 +11,9 @@ file_types = { path = "../file_types" }
 properties = { path = "../properties" }
 
 # External crates
-reqwest = { workspace = true, features = ["json", "blocking"] }
+reqwest = { workspace = true, features = ["json", "cookies"] }
 serde_json.workspace = true
 regex.workspace = true
 exitcode.workspace = true
+rand.workspace = true
+chrono.workspace = true
