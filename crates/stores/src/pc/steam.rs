@@ -6,6 +6,7 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use file_types::common;
 use properties;
+use constants::properties::variables::PROP_STEAM_API_KEY;
 use structs::internal::data::SaleInfo;
 use structs::response::steam::{App, PriceOverview};
 
@@ -99,6 +100,7 @@ pub async fn update_cached_games(){
 // API Functions 
 async fn get_games(client: &reqwest::Client, max_results: u32, last_appid: u32) -> Result<Vec<App>> {
     let steam_api_key = properties::get_steam_api_key();
+    if steam_api_key.is_empty() { panic!("Missing '{}' property.", PROP_STEAM_API_KEY) }
     let query_string = [
         ("key", steam_api_key.as_str()),
         ("max_results", &max_results.to_string()),

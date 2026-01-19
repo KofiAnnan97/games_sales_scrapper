@@ -672,6 +672,7 @@ async fn main(){
                 }
             }
             else if cmd.get_flag(SEND_EMAIL){
+                email::params_check();
                 let use_html = true;
                 let email_str = check_prices(use_html).await;
                 println!("Email Contents:\n{}\n", email_str);

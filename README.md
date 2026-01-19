@@ -58,7 +58,7 @@ Use the`--help` flag in command line to get more information on the supported co
     # Configure settings 
     game_sales_scrapper config settings -a -e 1 -r 0
     # Update properties with .env
-    game_sales_scrapper config properties -p
+    game_sales_scrapper config properties -f
     ```
 - `add` := add a specified game (title must be exact to work).
     ```commandline

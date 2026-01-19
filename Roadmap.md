@@ -10,7 +10,7 @@
     - [X] Setup separate config folder for settings and properties data
   - [X] Add visual reminder if test mode is enabled
   - [X] Allow for properties to be created/updated without .env file
-    - [ ]  Add check to confirm properties are set
+    - [X] Add check to confirm properties are set
 - Bugs/Fixes
   - [X] Fix GOG discount percentage (manually calculate)
   - [X] Fixed thresholds with same alias to support update and remove command

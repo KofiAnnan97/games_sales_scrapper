@@ -8,6 +8,7 @@ edition.workspace = true
 # Internal crates
 structs = { path = "../structs" }
 properties = { path = "../properties" }
+constants = { path = "../constants" }
 
 # External crates
 lettre.workspace = true
