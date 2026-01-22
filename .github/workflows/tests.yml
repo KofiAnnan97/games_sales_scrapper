@@ -26,8 +26,7 @@ jobs:
       run: bash ./setup/actions/create_env_file.sh
     - name: Configure project
       run: |
-        # Set properties
-        cargo run --release -- config properties --from-env
+        # Set properties and test mode
         cargo run --release -- config properties --test_mode 1
         # Set store fronts
         cargo run --release -- config settings -a 
@@ -56,8 +55,7 @@ jobs:
         run: .\setup\actions\create_env_file.ps1
       - name: Configure project
         run: |
-          # Set properties
-          cargo run --release -- config properties --from-env
+          # Set properties and test mode
           cargo run --release -- config properties --test_mode 1
           # Set store fronts
           cargo run --release -- config settings -a 

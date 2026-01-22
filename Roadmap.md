@@ -11,6 +11,7 @@
   - [X] Add visual reminder if test mode is enabled
   - [X] Allow for properties to be created/updated without .env file
     - [X] Add check to confirm properties are set
+    - [X] Check project path before allowing user to run commands (excluding properties subcmd)
 - Bugs/Fixes
   - [X] Fix GOG discount percentage (manually calculate)
   - [X] Fixed thresholds with same alias to support update and remove command

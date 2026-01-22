@@ -126,7 +126,7 @@ pub fn update_all_properties() {
             common::write_to_file(get_properties_path(), properties_str.expect("Properties could not be updated."));
         }
     } else {
-        eprintln!("Could not locate file: \"{}\".\nThis file must be present to update properties.", ENV_FILENAME);
+        eprintln!("'{}' must be present in the current directory to update properties.", ENV_FILENAME);
     }
 }
 
@@ -266,8 +266,7 @@ pub fn set_stmp_vars(host: String, port: u16, email: String, user: String, pass:
 
 pub fn set_project_path(path: &str) {
     if !Path::new(&path).is_dir() {
-        eprintln!("Project path was not set because '{}' is not a directory.", path);
-        return;
+        panic!("Project path was not set because '{}' is not a directory.", path);
     }
     match load_properties() {
         Ok(data) => {
