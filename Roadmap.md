@@ -9,9 +9,10 @@
   - [X] Turn properties and settings in subcommands for config cmd
     - [X] Setup separate config folder for settings and properties data
   - [X] Add visual reminder if test mode is enabled
-  - [X] Allow for properties to be created/updated without .env file
-    - [X] Add check to confirm properties are set
-    - [X] Check project path before allowing user to run commands (excluding properties subcmd)
+  - [X] Set properties without .env file
+    - [X] Add check to confirm properties are set before use
+    - ~~[X] Check project path before allowing user to run commands (excluding properties subcmd)~~
+    - [X] Default project path and test path if not set by user 
 - Bugs/Fixes
   - [X] Fix GOG discount percentage (manually calculate)
   - [X] Fixed thresholds with same alias to support update and remove command

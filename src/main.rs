@@ -27,19 +27,6 @@ fn storefront_check() -> Vec<String> {
     selected_stores
 }
 
-fn project_path_check() {
-    let mut project_path = properties::get_project_path();
-    if project_path.is_empty() {
-        print!("Please provide the project path: ");
-        let _ = io::stdout().flush();
-        io::stdin()
-            .read_line(&mut project_path)
-            .expect("Failed to read user input");
-        project_path = project_path.trim().to_string();
-        properties::set_project_path(&project_path);
-    }
-}
-
 fn get_simple_prices_str(store_name: &str, sales: Vec<SaleInfo>) -> String{
     let mut prices_str = String::new();
     for game in sales.iter(){
@@ -444,7 +431,6 @@ async fn main(){
         Some(("config", config_args)) => {
             match config_args.subcommand(){
                 Some(("settings", settings_args)) => {
-                    project_path_check();
                     // Parameters
                     let enable_aliases = settings_args.value_source("enable_aliases");
                     let allow_alias_reuse = settings_args.value_source("allow_alias_reuse");
@@ -488,7 +474,7 @@ async fn main(){
                 Some(("properties", properties_args)) => {
                     // Update properties from env
                     let from_env = properties_args.value_source(FROM_ENV).unwrap();
-                    if from_env == ValueSource::CommandLine { properties::update_all_properties(); }
+                    if from_env == ValueSource::CommandLine { properties::update_properties_from_env(); }
                     else if from_env == ValueSource::DefaultValue {
                         match properties_args.value_source("test_mode") {
                             Some(test_mode)  => {
@@ -581,7 +567,15 @@ async fn main(){
                     }
 
                     // Set test path
-
+                    match properties_args.get_one::<String>(SET_TEST_PATH){
+                        Some(path) => {
+                            let prev_path = properties::get_test_path();
+                            if !path.is_empty() && prev_path != *path {
+                                properties::set_test_path(path);
+                            }
+                        },
+                        None => (),
+                    }
 
                     // List properties
                     let list_properties = properties_args.value_source(LIST_PROPERTIES).unwrap();
@@ -609,7 +603,6 @@ async fn main(){
             }
         },
         Some(("add", add_args)) => {
-            project_path_check();
             let selected_stores = storefront_check();
             if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let alias = if add_args.contains_id("alias") && settings::get_alias_state() {
@@ -633,7 +626,6 @@ async fn main(){
             }
         },
         Some(("bulk-insert", bulk_args)) => {
-            project_path_check();
             let selected_stores = storefront_check();
             if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let mut game_list: Vec<SimpleGameThreshold> = Vec::new();
@@ -662,20 +654,17 @@ async fn main(){
             }
         },
         Some(("update", update_args)) => {
-            project_path_check();
             if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let title = update_args.get_one::<String>("title").unwrap().clone();
             let price = update_args.get_one::<f64>("price").unwrap().clone();
             thresholds::update_price(&title, price);
         },
         Some(("remove", remove_args)) => {
-            project_path_check();
             if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             let title = remove_args.get_one::<String>("title").unwrap().clone();
             thresholds::remove(&title);
         },
         _ => {
-            project_path_check();
             if properties::is_testing_enabled() { println!("------------------------\n* TEST MODE IS ENABLED *\n------------------------"); }
             if cmd.get_flag(LIST_THRESHOLDS) { thresholds::list_games(); }
             else if cmd.get_flag(LIST_SELECTED_STORES) { settings::list_selected(); }

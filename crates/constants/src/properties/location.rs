@@ -1,4 +1,5 @@
 // Directories
+pub static DEFAULT_TEST_DIR : &str = "testing";
 pub static DATA_DIR : &str = "data";
 pub static CONFIG_DIR : &str = "config";
 

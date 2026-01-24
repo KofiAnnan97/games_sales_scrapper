@@ -18,5 +18,6 @@ pub static PROP_SMTP_EMAIL : &str = "smtp_email";
 pub static PROP_SMTP_USERNAME : &str = "smtp_user";
 pub static PROP_SMTP_PASSWORD : &str = "smtp_pwd";
 pub static PROP_PROJECT_PATH : &str = "project_path";
+pub static PROP_TEST_PATH : &str = "test_path";
 pub static PROP_TEST_MODE : &str = "test_mode";
 pub static PROP_SLIDING_STEAM_APPID : &str = "sliding_steam_appid";
