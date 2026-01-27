@@ -12,8 +12,9 @@ use serde_json::{json, Value};
 
 use structs::internal::data::{GameThreshold, SimpleGameThreshold};
 use file_types::{common, csv};
-use file_ops::settings::{self, GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID};
-use file_ops::thresholds::THRESHOLDS;
+use file_ops::settings;
+use constants::operations::settings::{GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID};
+use constants::operations::thresholds::THRESHOLDS;
 use crate::tests::helper::{self, get_threshold_path};
 
 // Sample Game Data IDs

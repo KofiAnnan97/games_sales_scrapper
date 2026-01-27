@@ -1,3 +1,13 @@
+// Directories
+pub static DEFAULT_TEST_DIR : &str = "testing";
+pub static DATA_DIR : &str = "data";
+pub static CONFIG_DIR : &str = "config";
+
+// Filenames
+pub static PROPERTIES_FILENAME : &str = "properties.json";
+pub static ENV_FILENAME : &str = ".env";
+pub static DECRYPT_FILENAME : &str = "decrypt.key";
+
 // Environment variable names
 pub static STEAM_API_KEY_ENV : &str = "STEAM_API_KEY";
 pub static RECIPIENT_EMAIL_ENV : &str = "RECIPIENT_EMAIL";

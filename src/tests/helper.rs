@@ -1,24 +1,24 @@
 use std::{env, fs};
 use std::fs::{metadata, read_to_string};
 use std::path::{Path, PathBuf};
+use clap::builder::Str;
 use dotenv::dotenv as dotenv_linux;
 use dotenvy::dotenv as dotenv_windows;
 use serde_json::{json, Result, Value};
 use properties;
 use file_types::common;
 use structs::internal::data::GameThreshold;
-use file_ops::thresholds::{ALIAS_MAP, THRESHOLDS};
-use file_ops::settings::{ALIASES_ENABLED, ALLOW_ALIAS_REUSE_AFTER_CREATION, SELECTED_STORES};
-
-pub(in crate::tests) static THRESHOLD_FILENAME: &str = "thresholds.json";
-pub(in crate::tests) static SETTINGS_FILENAME: &str = "settings.json";
+use constants::operations::thresholds::{ALIAS_MAP, THRESHOLDS, THRESHOLD_FILENAME};
+use constants::operations::settings::{ALIASES_ENABLED, ALLOW_ALIAS_REUSE_AFTER_CREATION, 
+                                      SELECTED_STORES, SETTINGS_FILENAME};
+use constants::operations::properties::{CONFIG_DIR, DATA_DIR, TEST_PATH_ENV};
 
 pub(in crate::tests) fn get_data_path() -> String {
     if !properties::is_testing_enabled() { properties::set_test_mode(true); }
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
-    let mut data_path = env::var("TEST_PATH").unwrap_or_else(|_| String::from("."));
-    let path_buf: PathBuf = [&data_path, "data"].iter().collect();
+    let mut data_path = env::var(TEST_PATH_ENV).unwrap_or_else(|_| properties::get_test_path());
+    let path_buf: PathBuf = [&data_path, DATA_DIR].iter().collect();
     data_path = path_buf.display().to_string();
     if !Path::new(&data_path).is_dir() {
         let _ = fs::create_dir(&data_path);
@@ -30,8 +30,8 @@ pub(in crate::tests) fn get_config_path() -> String {
     if !properties::is_testing_enabled() { properties::set_test_mode(true); }
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
-    let mut config_path = env::var("TEST_PATH").unwrap_or_else(|_| String::from("."));
-    let path_buf: PathBuf = [&config_path, "config"].iter().collect();
+    let mut config_path = env::var(TEST_PATH_ENV).unwrap_or_else(|_| properties::get_test_path());
+    let path_buf: PathBuf = [&config_path, CONFIG_DIR].iter().collect();
     config_path = path_buf.display().to_string();
     if !Path::new(&config_path).is_dir() {
         let _ = fs::create_dir(&config_path);

@@ -1,18 +1,17 @@
 use std::collections::HashMap;
 use std::fs::{self, metadata, File};
-use std::path::{PathBuf, Path};
+use std::path::{PathBuf};
 use dotenv::dotenv as dotenv_linux;
 use dotenvy::dotenv as dotenv_windows;
 use rand::distr::{Alphanumeric, SampleString};
 
 use file_types::common;
 use crate::passwords;
-use constants::properties::location::{DEFAULT_TEST_DIR, CONFIG_DIR, 
-                                      DECRYPT_FILENAME, ENV_FILENAME};
-use constants::properties::variables::{STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, 
-                                       SMTP_HOST_ENV, SMTP_PORT_ENV,SMTP_EMAIL_ENV, 
-                                       SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, 
-                                       PROJECT_PATH_ENV, TEST_PATH_ENV};
+use constants::operations::properties::{DEFAULT_TEST_DIR, CONFIG_DIR, DECRYPT_FILENAME, 
+                                        ENV_FILENAME, STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, 
+                                        SMTP_HOST_ENV, SMTP_PORT_ENV,SMTP_EMAIL_ENV, 
+                                        SMTP_USERNAME_ENV, SMTP_PASSWORD_ENV, PROJECT_PATH_ENV, 
+                                        TEST_PATH_ENV};
 
 pub fn get_decrypt_key(project_path: String) -> String{
     let mut path_buf: PathBuf = [&project_path, CONFIG_DIR].iter().collect();
@@ -74,14 +73,14 @@ pub fn get_variables() -> HashMap<String, String> {
     vars
 }
 
-pub fn get_project_path() -> String {
+pub(crate) fn get_project_path() -> String {
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
     let project_path = std::env::var(PROJECT_PATH_ENV).unwrap_or_else(|_| String::new());
     project_path
 }
 
-pub fn get_test_path() -> String {
+pub(crate) fn get_test_path() -> String {
     if cfg!(target_os = "windows") { dotenv_windows().ok(); }
     else if cfg!(target_os = "linux") { dotenv_linux().ok(); }
     let test_path = std::env::var(TEST_PATH_ENV).unwrap_or_else(|_| String::new());

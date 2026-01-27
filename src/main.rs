@@ -6,15 +6,16 @@ use clap::parser::ValueSource;
 use serde_json::Value;
 
 // Internal libraries
-use constants::properties::variables::{PROP_PROJECT_PATH, PROP_RECIPIENT_EMAIL, PROP_SMTP_EMAIL, PROP_SMTP_HOST, 
-                                       PROP_SMTP_PORT, PROP_SMTP_USERNAME, PROP_TEST_MODE};
+use constants::operations::properties::{PROP_PROJECT_PATH, PROP_RECIPIENT_EMAIL, PROP_SMTP_EMAIL, PROP_SMTP_HOST, 
+                                        PROP_SMTP_PORT, PROP_SMTP_USERNAME, PROP_TEST_MODE};
+use constants::operations::settings::{GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID};
 use constants::cli::args::*;
 
 use stores::pc::{steam, gog, microsoft_store};
 use alerting::email;
 use file_types::csv;
 use properties;
-use file_ops::{settings::{self, GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID}, thresholds};
+use file_ops::{settings, thresholds};
 use structs::internal::data::{SaleInfo, SimpleGameThreshold};
 use structs::response::gog::GameInfo as GOGGameInfo;
 use structs::response::microsoft_store::ProductInfo;

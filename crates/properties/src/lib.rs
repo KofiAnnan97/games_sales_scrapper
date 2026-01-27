@@ -5,12 +5,12 @@ use serde_json::{json, Value, Result};
 use file_types::common;
 pub mod env_vars;
 pub mod passwords;
-use constants::properties::location::{DATA_DIR, CONFIG_DIR, DEFAULT_TEST_DIR, PROPERTIES_FILENAME, ENV_FILENAME};
-use constants::properties::variables::{PROJECT_PATH_ENV, TEST_PATH_ENV, STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, 
-                                       SMTP_HOST_ENV, SMTP_PORT_ENV, SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, 
-                                       SMTP_PASSWORD_ENV, PROP_STEAM_API_KEY, PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, 
-                                       PROP_SMTP_PORT, PROP_SMTP_EMAIL, PROP_SMTP_USERNAME, PROP_SMTP_PASSWORD, 
-                                       PROP_PROJECT_PATH, PROP_TEST_PATH, PROP_TEST_MODE, PROP_SLIDING_STEAM_APPID};
+use constants::operations::properties::{DATA_DIR, CONFIG_DIR, DEFAULT_TEST_DIR, PROPERTIES_FILENAME, ENV_FILENAME,
+                                        PROJECT_PATH_ENV, TEST_PATH_ENV, STEAM_API_KEY_ENV, RECIPIENT_EMAIL_ENV, 
+                                        SMTP_HOST_ENV, SMTP_PORT_ENV, SMTP_EMAIL_ENV, SMTP_USERNAME_ENV, 
+                                        SMTP_PASSWORD_ENV, PROP_STEAM_API_KEY, PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, 
+                                        PROP_SMTP_PORT, PROP_SMTP_EMAIL, PROP_SMTP_USERNAME, PROP_SMTP_PASSWORD, 
+                                        PROP_PROJECT_PATH, PROP_TEST_PATH, PROP_TEST_MODE, PROP_SLIDING_STEAM_APPID};
 use crate::env_vars::get_decrypt_key;
 
 // Retrieve paths

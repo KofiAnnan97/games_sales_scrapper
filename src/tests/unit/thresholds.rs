@@ -1,7 +1,8 @@
 use file_ops::{settings, thresholds};
 use file_types::common;
 use properties;
-use file_ops::settings::{GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID};
+use constants::operations::settings::{GOG_STORE_ID, MICROSOFT_STORE_ID, STEAM_STORE_ID};
+use constants::operations::thresholds::THRESHOLD_FILENAME;
 use file_ops::thresholds::update_thresholds;
 use structs::internal::data::GameThreshold;
 use structs::response::steam::App;
@@ -14,7 +15,7 @@ fn delete_thresholds() {
     settings::update_alias_reuse_state(1);
     let mut config_path = properties::get_data_path();
     config_path.push_str("/");
-    config_path.push_str(helper::THRESHOLD_FILENAME);
+    config_path.push_str(THRESHOLD_FILENAME);
     common::delete_file(config_path);
 }
 

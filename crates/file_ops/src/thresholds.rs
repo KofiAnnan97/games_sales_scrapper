@@ -5,19 +5,16 @@ use serde_json::{json, Result, Value};
 use std::fs::{metadata, read_to_string};
 
 use file_types::common;
-use crate::settings::{self, get_alias_reuse_state, ALLOW_ALIAS_REUSE_AFTER_CREATION};
+use constants::operations::settings::{STEAM_STORE_ID, GOG_STORE_ID, MICROSOFT_STORE_ID,
+                                      ALLOW_ALIAS_REUSE_AFTER_CREATION};
+use constants::operations::thresholds::*;
+use crate::settings::{self, get_alias_reuse_state};
 use stores::pc::steam; //, gog, microsoft_store};
 use structs::response::steam::App;
 use structs::response::gog::GameInfo as GOGGameInfo;
 use structs::response::microsoft_store::ProductInfo;
 use structs::internal::data::GameThreshold;
 use properties;
-
-static THRESHOLD_FILENAME : &str = "thresholds.json";
-
-// Threshold Variable
-pub static ALIAS_MAP : &str = "alias_map";
-pub static THRESHOLDS : &str = "thresholds";
 
 pub fn get_path() -> String {
     let path_buf: PathBuf = [properties::get_data_path(), THRESHOLD_FILENAME.to_string()].iter().collect();
@@ -110,7 +107,7 @@ pub async fn add_steam_game(new_alias: String, app: App, price: f64, client: &re
                 if is_threshold(&app.name, elem) {
                     unique = false;
                     if elem.steam_id == 0 {
-                        update_id(&elem.title, settings::STEAM_STORE_ID, app.app_id);
+                        update_id(&elem.title, STEAM_STORE_ID, app.app_id);
                     }
                     break;
                 }
@@ -151,7 +148,7 @@ pub fn add_gog_game(new_alias: String, game: &GOGGameInfo, price: f64){
             unique = false;
             if elem.gog_id == 0 {
                 let game_id = game.id.parse::<u32>().unwrap();
-                update_id(&elem.title, settings::GOG_STORE_ID, game_id);
+                update_id(&elem.title, GOG_STORE_ID, game_id);
             }
             break;
         }
@@ -194,7 +191,7 @@ pub fn add_microsoft_store_game(new_alias: String, game: &ProductInfo, price: f6
             unique = false;
             if elem.microsoft_store_id.is_empty() {
                 let game_id = &game.product_id;
-                update_id_str(&elem.title, settings::MICROSOFT_STORE_ID, game_id);
+                update_id_str(&elem.title, MICROSOFT_STORE_ID, game_id);
             }
             break;
         }
@@ -289,13 +286,13 @@ pub fn update_id(title: &str, store_type: &str, id: u32){
         let i = idx.unwrap();
         let mut store_name = String::new();
         match store_type{
-            settings::STEAM_STORE_ID => {
-                store_name = settings::get_proper_store_name(settings::STEAM_STORE_ID).unwrap();
+            STEAM_STORE_ID => {
+                store_name = settings::get_proper_store_name(STEAM_STORE_ID).unwrap();
                 thresholds[i].steam_id = id;
                 updated_id = true;
             },
-            settings::GOG_STORE_ID => {
-                store_name = settings::get_proper_store_name(settings::GOG_STORE_ID).unwrap();
+            GOG_STORE_ID => {
+                store_name = settings::get_proper_store_name(GOG_STORE_ID).unwrap();
                 thresholds[i].gog_id = id;
                 updated_id = true;
             },
@@ -317,8 +314,8 @@ pub fn update_id_str(title: &str, store_type: &str, id: &str){
         let i = idx.unwrap();
         let mut store_name = String::new();
         match store_type {
-            settings::MICROSOFT_STORE_ID => {
-                store_name = settings::get_proper_store_name(settings::MICROSOFT_STORE_ID).unwrap();
+            MICROSOFT_STORE_ID => {
+                store_name = settings::get_proper_store_name(MICROSOFT_STORE_ID).unwrap();
                 thresholds[i].microsoft_store_id = id.to_string();
                 updated_id = true;
             }

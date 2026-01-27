@@ -4,7 +4,7 @@ use lettre::transport::smtp::authentication::{Credentials, Mechanism};
 
 use structs::internal::data::SaleInfo;
 use properties;
-use constants::properties::variables::{PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, PROP_SMTP_PORT, 
+use constants::operations::properties::{PROP_RECIPIENT_EMAIL, PROP_SMTP_HOST, PROP_SMTP_PORT, 
                                         PROP_SMTP_EMAIL, PROP_SMTP_USERNAME, PROP_SMTP_PASSWORD};
 
 pub fn params_check(){

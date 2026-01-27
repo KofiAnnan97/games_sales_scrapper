@@ -6,7 +6,7 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use file_types::common;
 use properties;
-use constants::properties::variables::PROP_STEAM_API_KEY;
+use constants::operations::properties::PROP_STEAM_API_KEY;
 use structs::internal::data::SaleInfo;
 use structs::response::steam::{App, PriceOverview};
 

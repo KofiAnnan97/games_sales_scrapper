@@ -5,25 +5,7 @@ use std::path::PathBuf;
 
 use file_types::common;
 use properties;
-
-static CONFIG_FILENAME : &str = "settings.json";
-static ENABLED_STATE : i32 = 1;
-static DISABLED_STATE : i32 = 0;
-
-// Store IDs
-pub const STEAM_STORE_ID : &str = "steam";
-pub const GOG_STORE_ID : &str = "gog";
-pub const MICROSOFT_STORE_ID : &str = "microsoft_store";
-
-// Store Names (Plain text)
-pub const STEAM_STORE_NAME : &str = "Steam";
-pub const GOG_STORE_NAME : &str = "Good Old Games (GOG)";
-pub const MICROSOFT_STORE_NAME : &str = "Microsoft Store (PC)";
-
-// Configuration Variables
-pub const SELECTED_STORES : &str = "selected_stores";
-pub const ALIASES_ENABLED : &str = "alias_enabled";
-pub const ALLOW_ALIAS_REUSE_AFTER_CREATION : &str = "allow_alias_reuse_after_creation";
+use constants::operations::settings::*;
 
 fn get_store_map() -> HashMap<String, String> {
     let store_map = HashMap::from([
@@ -52,7 +34,7 @@ pub fn get_proper_store_name(id: &str) -> Option<String> {
 }
 
 fn get_path() -> String{
-    let path_buf: PathBuf = [properties::get_config_path(), CONFIG_FILENAME.to_string()].iter().collect();
+    let path_buf: PathBuf = [properties::get_config_path(), SETTINGS_FILENAME.to_string()].iter().collect();
     let config_path = path_buf.display().to_string();
     let path_str = common::get_path(&config_path);  //Creates file if it does not exist already
     match metadata(&path_str){
